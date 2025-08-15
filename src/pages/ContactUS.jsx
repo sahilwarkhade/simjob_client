@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { Dropdown } from "../components/General/Dropdown";
+import { inquiryTypes } from "../constants";
 
 export default function ContactUs() {
   const [isVisible, setIsVisible] = useState(false);
@@ -21,8 +23,8 @@ export default function ContactUs() {
     email: "",
     subject: "",
     message: "",
-    inquiryType: "general",
   });
+  const [inquiryType,setInquiryType]=useState(null)
   const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate=useNavigate();
   const {token}=useContext(AuthContext)
@@ -40,7 +42,6 @@ export default function ContactUs() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate form submission
     console.log(formData)
     setIsSubmitted(true);
     setTimeout(() => {
@@ -50,7 +51,6 @@ export default function ContactUs() {
         email: "",
         subject: "",
         message: "",
-        inquiryType: "general",
       });
     }, 1000*60*60*24);
   };
@@ -77,14 +77,6 @@ export default function ContactUs() {
       contact: "FAQ & Guides",
       action: "Visit Help Center",
     },
-  ];
-
-  const inquiryTypes = [
-    { value: "general", label: "General Inquiry" },
-    { value: "support", label: "Technical Support" },
-    { value: "business", label: "Business/Partnership" },
-    { value: "feedback", label: "Product Feedback" },
-    { value: "media", label: "Media/Press" },
   ];
 
   const faqs = [
@@ -239,7 +231,7 @@ export default function ContactUs() {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label
                       htmlFor="inquiryType"
                       className="block text-sm sm:text-base font-medium text-gray-700 !mb-2"
@@ -259,8 +251,15 @@ export default function ContactUs() {
                         </option>
                       ))}
                     </select>
-                  </div>
-
+                  </div> */}
+                  <Dropdown
+                  label={'Inquiry Type'}
+                  options={inquiryTypes}
+                  value={inquiryType}
+                  onChange={setInquiryType}
+                  placeholder="select inquiry type..."
+                  required
+                  />
                   <div>
                     <label
                       htmlFor="subject"

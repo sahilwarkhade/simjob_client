@@ -7,22 +7,27 @@ import SignUpPage from "./pages/Auth/SignUpPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import { AuthContextProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
-import {Profile} from "./pages/Profile";
-
+import { Profile } from "./pages/Profile";
+import { OATestProblem } from "./pages/OATestProblem";
+import AllTestProblems from "./pages/AllTestProblems";
 
 function App() {
   return (
     <AuthContextProvider>
       <div className="app">
-        <NavbarLayout />
+        {/* <NavbarLayout /> */}
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/contactus" element={<ContactUs />} />
-          <Route path="signup" element={<SignUpPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard/>}/>
-          <Route path="/profile" element={<Profile/>}/>
+          <Route path="/" element={<NavbarLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contactus" element={<ContactUs />} />
+            <Route path="signup" element={<SignUpPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+            <Route path="/test/problem" element={<AllTestProblems />} />
+            <Route path="/test/problem/:id" element={<OATestProblem />} />
         </Routes>
       </div>
     </AuthContextProvider>

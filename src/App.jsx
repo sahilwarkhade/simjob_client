@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import { Profile } from "./pages/Profile";
 import { OATestProblem } from "./pages/OATestProblem";
 import AllTestProblems from "./pages/AllTestProblems";
+import { ForgetPassword } from "./pages/Auth/ForgetPassword";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           </Route>
             <Route path="/test/problem" element={<AllTestProblems />} />
             <Route path="/test/problem/:id" element={<OATestProblem />} />
+            <Route path="/forget-password" element={<ForgetPassword/>} />
         </Routes>
       </div>
     </AuthContextProvider>

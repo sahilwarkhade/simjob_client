@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { LogOut, User } from "lucide-react";
+import { logout } from "../services/apis/authApi";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -21,8 +22,11 @@ const Navbar = () => {
     };
   }, []);
 
-  const { token } = useContext(AuthContext);
+  const { isLoggedIn,setIsLoggedIn} = useContext(AuthContext);
 
+  const handleLogout=async()=>{
+    await logout(setIsLoggedIn);
+  }
   return (
     <header className={`header ${isScrolled ? "header-scrolled" : ""}`}>
       <nav className="nav">
@@ -34,12 +38,12 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="nav-links">
-          <Link to={token ? "/dashboard" : "/pricing"}>
-            {token ? "Dashboard" : "Pricing"}
+          <Link to={isLoggedIn ? "/dashboard" : "/pricing"}>
+            {isLoggedIn ? "Dashboard" : "Pricing"}
           </Link>
           <Link to={"/about"}>About</Link>
           <Link to={"/contactus"}>Contact Us</Link>
-          {!token ? (
+          {!isLoggedIn ? (
             <button
               className="btn btn-primary"
               onClick={() => navigate("/signup")}
@@ -51,13 +55,13 @@ const Navbar = () => {
             //   <HiMiniIdentification className="w-8 h-8" />
             // </button>
             <div className="flex items-center !space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center ">
-                  <button className="cursor-pointer" onClick={(e)=>navigate('/profile')}>
+                <div className=" flex items-center justify-center">
+                  <button className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer" onClick={(e)=>navigate('/profile')}>
                     <User className="w-4 h-4 text-white cursor-pointer" />
                   </button>
                 </div>
-                <span className="text-sm font-medium text-gray-700">UserName</span>
-                <button className="!p-1 text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200" title="LogOut">
+                {/* <span className="text-sm font-medium text-gray-700">UserName</span> */}
+                <button className="!p-1 text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200" title="LogOut" onClick={()=>handleLogout()}>
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
@@ -82,10 +86,10 @@ const Navbar = () => {
         : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
     }`}
       >
-        <Link to={token ? "/dashboard" : "/pricing"} onClick={() => setIsOpen(false)}>
-         {token ? "Dashboard" : "Pricing"}
+        <Link to={isLoggedIn ? "/dashboard" : "/pricing"} onClick={() => setIsOpen(false)}>
+         {isLoggedIn ? "Dashboard" : "Pricing"}
         </Link>
-        {!token ? <button
+        {!isLoggedIn ? <button
           className="btn btn-primary !mt-2"
           onClick={() => {
             setIsOpen(false);
@@ -100,11 +104,11 @@ const Navbar = () => {
         <Link to="/contactus" onClick={() => setIsOpen(false)}>
           Contact Us
         </Link>
-        {token && <button
+        {isLoggedIn && <button
           className="btn btn-primary !mt-2"
           onClick={() => {
             setIsOpen(false);
-            navigate("/signup");
+            handleLogout();
           }}
         >
           Log Out

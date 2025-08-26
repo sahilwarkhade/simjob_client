@@ -1,13 +1,32 @@
-import { createContext, useState } from "react";
+import axios from "axios";
+import { createContext, useEffect, useState } from "react";
+import { BASE_URL } from "../constants";
 
-export const AuthContext=createContext();
+export const AuthContext = createContext();
 
-export const  AuthContextProvider=({children})=>{
-    const[loading,setLoading]= useState(false);
-    const[token, setToken]=useState(localStorage.getItem('token') ? localStorage.getItem('token') : null);
-    return(
-        <AuthContext.Provider value={{loading,setLoading, token, setToken}}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+export const AuthContextProvider = ({ children }) => {
+  const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const response = await axios.get(`${BASE_URL}/check`, {
+        withCredentials: true,
+      });
+
+      if (response?.data?.success) {
+        console.log("IS LOGGED IN :: ", response?.data?.success)
+        setIsLoggedIn(true);
+      }
+    })();
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{ loading, setLoading, isLoggedIn, setIsLoggedIn, user, setUser }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};

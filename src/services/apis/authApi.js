@@ -2,19 +2,20 @@ import { toast } from "react-toastify";
 import { apiConnector } from "../apiConnector";
 import { BASE_URL } from "../../constants";
 
-export const continueWithGoogle = async (idToken,navigate) => {
+export const continueWithGoogle = async (idToken, navigate, setIsLoggedIn) => {
   try {
     const response = await apiConnector("POST", `${BASE_URL}/auth/google`, {
       idToken,
     });
 
-    if(!response?.data?.success){
-      toast.error('Please, try again later');
+    if (!response?.data?.success) {
+      toast.error("Please, try again later");
       return;
     }
 
-    toast.success('Logged in successfully');
-    navigate('/')
+    toast.success("Logged in successfully");
+    setIsLoggedIn(true);
+    navigate("/");
   } catch (error) {
     console.log("ERROR IN LOGIN WITH GOOGLE :: ", error);
     toast.error("Failed to continue with google");
@@ -100,8 +101,8 @@ export const registerUser = async (formData, navigate) => {
     }
 
     toast.success("User Signed Up successfully");
+    // navigate('/')
     return response;
-    // navigate('/login')
   } catch (error) {
     console.log("ERROR in registering user :: ", error);
     toast.error("Something went wrong");
@@ -134,7 +135,8 @@ export const loginUser = async (formData) => {
     toast.success("User logged in successfully");
     return response;
   } catch (error) {
-    console.log("ERROR in login :: ", error), toast.error(error?.message);
+    console.log("ERROR in login :: ", error);
+    toast.error(error?.response?.data?.message);
   }
 };
 
@@ -172,18 +174,18 @@ export const forgetPassword = async (
   }
 };
 
-export const logout=async(setIsLoggedIn)=>{
+export const logout = async (setIsLoggedIn) => {
   try {
-    const response=await apiConnector('POST',`${BASE_URL}/auth/logout`);
-    if(!response?.data?.success){
-      toast.error('Somthing went wrong, please try after sometime')
+    const response = await apiConnector("POST", `${BASE_URL}/auth/logout`);
+    if (!response?.data?.success) {
+      toast.error("Somthing went wrong, please try after sometime");
       return;
     }
 
-    setIsLoggedIn(false)
-    toast.success('Logout successfully');
+    setIsLoggedIn(false);
+    toast.success("Logout successfully");
   } catch (error) {
     console.log("ERROR in LOGOUT :: ", error);
-    toast.error(error.message)
+    toast.error(error.message);
   }
-}
+};

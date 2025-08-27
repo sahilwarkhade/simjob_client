@@ -5,10 +5,9 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import AuthLayout from "../../layouts/AuthLayout";
 import { AuthContext } from "../../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
-import { continueWithGitHub } from "../../services/apis/authApi";
+import { continueWithGitHub,continueWithGoogle } from "../../services/apis/authApi";
 import { loginUser } from "../../services/apis/authApi";
 import { Spinner } from "../../components/Spinner/Spinner";
-import { logout } from "../../services/apis/authApi";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -62,9 +61,8 @@ const LoginPage = () => {
       <div className="!space-y-3">
         <GoogleLogin
           onSuccess={async (credentialResponse) => {
-            await continueWithGoogle(credentialResponse.credential, navigate);
+            await continueWithGoogle(credentialResponse.credential, navigate,setIsLoggedIn);
           }}
-          type=""
           logo_alignment="center"
           size="large"
           theme="outline"

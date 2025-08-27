@@ -1,19 +1,23 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { AlertTriangle, Trash2, X } from "lucide-react";
+import { deleteAccount } from "../../services/apis/userApi";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const DeleteAccountModal = ({setIsDeleteModalOpen}) => {
+const DeleteAccountModal = ({ setIsDeleteModalOpen }) => {
+  const navigate=useNavigate();
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const { setIsLoggedIn } = useContext(AuthContext);
 
   const handleDeleteAccount = async () => {
     if (confirmText !== "DELETE") {
       return;
     }
-
     setIsDeleting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await deleteAccount(setIsLoggedIn,navigate);
 
     alert("Account deleted successfully");
     setIsDeleting(false);

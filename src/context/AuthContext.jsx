@@ -16,11 +16,10 @@ export const AuthContextProvider = ({ children }) => {
       });
 
       if (response?.data?.success) {
-        console.log("IS LOGGED IN :: ", response?.data?.success)
         setIsLoggedIn(true);
       }
     })();
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <AuthContext.Provider

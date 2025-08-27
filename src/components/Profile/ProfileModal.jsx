@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Upload, User, X } from "lucide-react";
+import { toast } from "react-toastify";
+import { updateUserProfileImage } from "../../services/apis/userApi";
 
 const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -39,11 +42,16 @@ const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
     setIsDragging(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (previewPhoto) {
-      setCurrentPhoto(previewPhoto);
+      const formData = new FormData();
+      formData.append("profileImage", previewPhoto);
+      const response = await updateUserProfileImage(formData);
+      if (response?.data?.success) {
+        setCurrentPhoto(previewPhoto);
+        setIsModalOpen(false);
+      }
       setPreviewPhoto(null);
-      setIsModalOpen(false);
     }
   };
 

@@ -624,7 +624,6 @@ export const inquiryTypes = [
   { id: 18, value: "upgrade", label: "Upgrade Plan" },
 ];
 
-
 export const problem = {
   id: "2sum",
   title: "1. Two Sum",
@@ -632,28 +631,28 @@ export const problem = {
   description: [
     "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.",
     "You may assume that each input would have exactly one solution, and you may not use the same element twice.",
-    "You can return the answer in any order."
+    "You can return the answer in any order.",
   ],
   examples: [
     {
       input: "nums = [2,7,11,15], target = 9",
       output: "[0,1]",
-      explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]."
+      explanation: "Because nums[0] + nums[1] == 9, we return [0, 1].",
     },
     {
       input: "nums = [3,2,4], target = 6",
-      output: "[1,2]"
+      output: "[1,2]",
     },
     {
       input: "nums = [3,3], target = 6",
-      output: "[0,1]"
-    }
+      output: "[0,1]",
+    },
   ],
   constraints: [
     "`2 <= nums.length <= 10^4`",
     "`-10^9 <= nums[i] <= 10^9`",
     "`-10^9 <= target <= 10^9`",
-    "**Only one valid answer exists.**"
+    "**Only one valid answer exists.**",
   ],
   boilerplate: {
     javascript: `/**
@@ -671,9 +670,14 @@ var twoSum = function(nums, target) {
     public int[] twoSum(int[] nums, int target) {
         
     }
-}`
-  }
+}`,
+  },
 };
 
-export const BASE_URL="http://localhost:4000/api/v1"
+export const BASE_URL = "http://localhost:4000/api/v1";
 
+export const genderOptions = [
+  { id: 1, value: "male", label: "Male" },
+  { id: 1, value: "female", label: "Female" },
+  { id: 1, value: "other", label: "other" },
+];

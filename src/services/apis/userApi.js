@@ -81,7 +81,47 @@ export const updateProfessionalProfileDetails = async (formData) => {
   }
 };
 
-export const deleteAccount = async (setIsLoggedIn,navigate) => {
+export const updatePassword = async (
+  currentPassword,
+  newPassword,
+  newConfirmPassword,
+  navigate
+) => {
+  try {
+    if (!currentPassword) {
+      toast.error("Current Password is required");
+      return;
+    }
+
+    if (!newPassword) {
+      toast.error("Password is required");
+      return;
+    }
+
+    if (newPassword !== newConfirmPassword) {
+      toast.error("Password and confirm password should match");
+      return;
+    }
+
+    const response = await apiConnector(
+      "POST",
+      `${BASE_URL}/auth/update-password`,
+      { currentPassword, newPassword, newConfirmPassword }
+    );
+
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message);
+    }
+
+    toast.success(response?.data?.message);
+    navigate('/')
+    return response
+  } catch (error) {
+    console.log("ERROR in updating password :: ",error);
+    toast.error(error?.response?.data?.message);
+  }
+};
+export const deleteAccount = async (setIsLoggedIn, navigate) => {
   try {
     const response = await apiConnector(
       "DELETE",
@@ -94,7 +134,7 @@ export const deleteAccount = async (setIsLoggedIn,navigate) => {
 
     toast.success(response?.data?.message);
     setIsLoggedIn(false);
-    navigate('/')
+    navigate("/");
   } catch (error) {
     console.log("ERROR in deleting acccount ::", error);
     toast.error(error?.response?.data?.message);

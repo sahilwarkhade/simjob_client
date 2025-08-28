@@ -22,11 +22,12 @@ const Navbar = () => {
     };
   }, []);
 
-  const { isLoggedIn,setIsLoggedIn} = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 
-  const handleLogout=async()=>{
+  const handleLogout = async () => {
     await logout(setIsLoggedIn);
-  }
+    navigate("/");
+  };
   return (
     <header className={`header ${isScrolled ? "header-scrolled" : ""}`}>
       <nav className="nav">
@@ -55,16 +56,23 @@ const Navbar = () => {
             //   <HiMiniIdentification className="w-8 h-8" />
             // </button>
             <div className="flex items-center !space-x-3">
-                <div className=" flex items-center justify-center">
-                  <button className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer" onClick={(e)=>navigate('/profile')}>
-                    <User className="w-4 h-4 text-white cursor-pointer" />
-                  </button>
-                </div>
-                {/* <span className="text-sm font-medium text-gray-700">UserName</span> */}
-                <button className="!p-1 text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200" title="LogOut" onClick={()=>handleLogout()}>
-                  <LogOut className="w-5 h-5" />
+              <div className=" flex items-center justify-center">
+                <button
+                  className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
+                  onClick={(e) => navigate("/profile")}
+                >
+                  <User className="w-4 h-4 text-white cursor-pointer" />
                 </button>
               </div>
+              {/* <span className="text-sm font-medium text-gray-700">UserName</span> */}
+              <button
+                className="!p-1 text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200"
+                title="LogOut"
+                onClick={() => handleLogout()}
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           )}
         </div>
         <button
@@ -86,34 +94,42 @@ const Navbar = () => {
         : "opacity-0 -translate-y-2 max-h-0 overflow-hidden"
     }`}
       >
-        <Link to={isLoggedIn ? "/dashboard" : "/pricing"} onClick={() => setIsOpen(false)}>
-         {isLoggedIn ? "Dashboard" : "Pricing"}
-        </Link>
-        {!isLoggedIn ? <button
-          className="btn btn-primary !mt-2"
-          onClick={() => {
-            setIsOpen(false);
-            navigate("/signup");
-          }}
+        <Link
+          to={isLoggedIn ? "/dashboard" : "/pricing"}
+          onClick={() => setIsOpen(false)}
         >
-          Get Started
-        </button> : <Link to={'/profile'}>Profile</Link>}
+          {isLoggedIn ? "Dashboard" : "Pricing"}
+        </Link>
+        {!isLoggedIn ? (
+          <button
+            className="btn btn-primary !mt-2"
+            onClick={() => {
+              setIsOpen(false);
+              navigate("/signup");
+            }}
+          >
+            Get Started
+          </button>
+        ) : (
+          <Link to={"/profile"}>Profile</Link>
+        )}
         <Link to="/about" onClick={() => setIsOpen(false)}>
           About
         </Link>
         <Link to="/contactus" onClick={() => setIsOpen(false)}>
           Contact Us
         </Link>
-        {isLoggedIn && <button
-          className="btn btn-primary !mt-2"
-          onClick={() => {
-            setIsOpen(false);
-            handleLogout();
-          }}
-        >
-          Log Out
-        </button>}
-        
+        {isLoggedIn && (
+          <button
+            className="btn btn-primary !mt-2"
+            onClick={() => {
+              setIsOpen(false);
+              handleLogout();
+            }}
+          >
+            Log Out
+          </button>
+        )}
       </div>
     </header>
   );

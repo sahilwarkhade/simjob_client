@@ -100,7 +100,7 @@ export const registerUser = async (formData, navigate) => {
       throw new Error(response?.data?.message);
     }
 
-    toast.success("User Signed Up successfully");
+    // toast.success("User Signed Up successfully");
     // navigate('/')
     return response;
   } catch (error) {

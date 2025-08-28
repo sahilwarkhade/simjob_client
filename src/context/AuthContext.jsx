@@ -19,7 +19,7 @@ export const AuthContextProvider = ({ children }) => {
         setIsLoggedIn(true);
       }
     })();
-  }, [isLoggedIn]);
+  }, [isLoggedIn,setIsLoggedIn,user]);
 
   return (
     <AuthContext.Provider

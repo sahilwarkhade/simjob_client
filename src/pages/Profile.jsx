@@ -28,10 +28,14 @@ import DeleteAccountModal from "../components/Profile/DeleteAccountModal";
 import { AuthContext } from "../context/AuthContext";
 import {
   getUserProfile,
+  updatePassword,
   updatePersonalProfileDetails,
   updateProfessionalProfileDetails,
 } from "../services/apis/userApi";
 import { Spinner } from "../components/Spinner/Spinner";
+import { Dropdown } from "../components/General/Dropdown";
+import { experienceLevels, genderOptions, skills } from "../constants";
+import { useNavigate } from "react-router-dom";
 
 const userStats = {
   totalMockSessions: 47,
@@ -87,11 +91,11 @@ const sections = [
     label: "Professional",
     icon: <Briefcase className="w-4 h-4" />,
   },
-  {
-    id: "preferences",
-    label: "Preferences",
-    icon: <Settings className="w-4 h-4" />,
-  },
+  // {
+  //   id: "preferences",
+  //   label: "Preferences",
+  //   icon: <Settings className="w-4 h-4" />,
+  // },
   {
     id: "notifications",
     label: "Notifications",
@@ -144,7 +148,8 @@ const achievements = [
 ];
 
 export function Profile() {
-  const { user, setUser, loading, setLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { user, setUser, loading, setLoading, setIsLoggedIn} = useContext(AuthContext);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPhoto, setCurrentPhoto] = useState(
@@ -154,11 +159,14 @@ export function Profile() {
 
   const [activeSection, setActiveSection] = useState("personal");
   const [isEditing, setIsEditing] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [profilePersonalData, setProfilePersonalData] = useState({
     fullName: "",
-    gender: "",
     email: "",
     mobileNumber: "",
     address: "",
@@ -167,20 +175,24 @@ export function Profile() {
     bio: "",
   });
 
+  const [editingProfilePersonalData, setEditingProfilePersonalData] =
+    useState(null);
+
+  const [gender, setGender] = useState(genderOptions[2]);
+  const [editGender, setEditGender] = useState(null);
+
   const [profileProfessionalData, setProfileProfessionalData] = useState({
-    currentRole: "Software Engineer",
-    targetRole: "Senior Software Engineer",
-    experience: "3 years",
-    skills: [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "Python",
-      "AWS",
-      "System Design",
-    ],
-    targetCompanies: ["Google", "Microsoft", "Amazon", "Meta", "Netflix"],
+    currentRole: "",
+    targetRole: "",
+    skills: [],
+    targetCompanies: [],
   });
+
+  const [editingProfilProfessionalData, setEditingProfilProfessionalData] =
+    useState(null);
+
+  const [experience, setExperience] = useState(experienceLevels[0]);
+  const [editExperience, setEditExperience] = useState(null);
 
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
@@ -204,7 +216,6 @@ export function Profile() {
     if (user) {
       const userPersonalData = {
         fullName: user?.fullName || "",
-        gender: user?.additionalDetails?.personalInformation?.gender || "",
         email: user?.email || "",
         mobileNumber:
           user?.additionalDetails?.personalInformation?.mobileNumber,
@@ -215,6 +226,8 @@ export function Profile() {
       };
 
       setProfilePersonalData({ ...userPersonalData });
+
+      setGender(user?.additionalDetails?.personalInformation?.gender || "");
     }
     if (user) {
       const userProfessionalData = {
@@ -222,54 +235,105 @@ export function Profile() {
           user?.additionalDetails?.professionalInformation?.currentRole,
         targetRole:
           user?.additionalDetails?.professionalInformation?.targetedRole,
-        experience:
-          user?.additionalDetails?.professionalInformation?.experienceLevel,
         skills: [...user?.additionalDetails?.professionalInformation?.skills],
         targetCompanies: [
           ...user?.additionalDetails?.professionalInformation?.targetCompanies,
         ],
       };
       setProfileProfessionalData({ ...userProfessionalData });
+      setExperience(
+        user?.additionalDetails?.professionalInformation?.experienceLevel
+      );
     }
+    setLoading(false);
   }, [user, setUser]);
 
   const handlePersonalInputChange = (field, value) => {
-    setProfilePersonalData((prev) => ({ ...prev, [field]: value }));
+    setEditingProfilePersonalData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleProfesssionalInputChange = (field, value) => {
-    setProfileProfessionalData((prev) => ({ ...prev, [field]: value }));
+    setEditingProfilProfessionalData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePreferenceChange = (field, value) => {
     setPreferences((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleEdit = (e) => {
+    e.preventDefault();
+
+    if (activeSection === "personal") {
+      setEditingProfilePersonalData({ ...profilePersonalData });
+      setEditGender(gender);
+      setIsEditing(true);
+    }
+
+    if (activeSection === "professional") {
+      setEditingProfilProfessionalData({
+        ...profileProfessionalData,
+        skills: [...profileProfessionalData.skills],
+        targetCompanies: [...profileProfessionalData.targetCompanies],
+      });
+      setEditExperience(experience);
+      setIsEditing(true);
+    }
+  };
+
   const saveProfile = async (e) => {
     e.preventDefault();
-    setLoading(true);
     if (activeSection === "personal") {
-      const response = await updatePersonalProfileDetails(profilePersonalData);
+      const response = await updatePersonalProfileDetails({
+        ...editingProfilePersonalData,
+        gender: editGender?.label,
+      });
       if (response?.data?.success) {
         await getUserProfile(setUser);
+        setGender(editGender);
+        setProfilePersonalData(editingProfilePersonalData);
         setIsEditing(false);
       }
     }
     if (activeSection === "professional") {
-      const response = await updateProfessionalProfileDetails(
-        profileProfessionalData
-      );
+      const response = await updateProfessionalProfileDetails({
+        ...editingProfilProfessionalData,
+        experience: editExperience?.label,
+      });
       if (response?.data?.success) {
         await getUserProfile(setUser);
+        setProfileProfessionalData(editingProfilProfessionalData);
+        setExperience(editExperience);
         setIsEditing(false);
       }
     }
-    setLoading(false);
   };
 
   const cancelEdit = () => {
+    setEditingProfilePersonalData(null);
+    setEditingProfilProfessionalData(null);
+    setEditGender(null);
+    setEditExperience(null);
     setIsEditing(false);
   };
+
+  const handelUpdatePassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const response = await updatePassword(
+      currentPassword,
+      password,
+      confirmPassword,
+      navigate
+    );
+    console.log(response)
+    setLoading(false);
+    setIsLoggedIn(true);
+  };
+
+  let isNotLocalLogin = false;
+  if (user) {
+    isNotLocalLogin = user?.authStrategy !== "local";
+  }
 
   if (loading) {
     return (
@@ -312,7 +376,7 @@ export function Profile() {
                 <h3 className="font-semibold text-gray-900">
                   {profilePersonalData.fullName}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 capitalize">
                   {profileProfessionalData.currentRole}
                 </p>
               </div>
@@ -367,7 +431,7 @@ export function Profile() {
                         </>
                       ) : (
                         <button
-                          onClick={() => setIsEditing(true)}
+                          onClick={(e) => handleEdit(e)}
                           className="flex items-center !space-x-2 !px-3 !py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -390,7 +454,11 @@ export function Profile() {
                         </label>
                         <input
                           type="text"
-                          value={profilePersonalData.fullName}
+                          value={
+                            isEditing
+                              ? editingProfilePersonalData?.fullName
+                              : profilePersonalData?.fullName
+                          }
                           onChange={(e) =>
                             handlePersonalInputChange(
                               "fullName",
@@ -407,16 +475,15 @@ export function Profile() {
                         <label className="block text-sm font-medium text-gray-700 !mb-2 ">
                           Gender
                         </label>
-                        <input
-                          type="text"
-                          value={profilePersonalData.gender}
-                          onChange={(e) =>
-                            handlePersonalInputChange("gender", e.target.value)
-                          }
+
+                        <Dropdown
+                          options={genderOptions}
+                          value={isEditing ? editGender : gender}
+                          onChange={setEditGender}
+                          placeholder="Select your gender"
+                          size="lg"
                           disabled={!isEditing}
-                          className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 capitalize ${
-                            isEditing ? "cursor-pointer" : "cursor-not-allowed"
-                          } text-gray-600`}
+                          variant="filled"
                         />
                       </div>
                     </div>
@@ -429,7 +496,11 @@ export function Profile() {
                         <Mail className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                           type="email"
-                          value={profilePersonalData.email}
+                          value={
+                            isEditing
+                              ? editingProfilePersonalData?.email
+                              : profilePersonalData?.email
+                          }
                           onChange={(e) =>
                             handlePersonalInputChange("email", e.target.value)
                           }
@@ -449,13 +520,18 @@ export function Profile() {
                           <Phone className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
                             type="tel"
-                            value={profilePersonalData.mobileNumber}
+                            value={
+                              isEditing
+                                ? editingProfilePersonalData?.mobileNumber
+                                : profilePersonalData?.mobileNumber
+                            }
                             onChange={(e) =>
                               handlePersonalInputChange(
                                 "mobileNumber",
                                 e.target.value
                               )
                             }
+                            placeholder="+91-xxxx-xx-xxxx"
                             disabled={!isEditing}
                             className={`w-full !pl-10 !pr-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 ${
                               isEditing
@@ -473,13 +549,18 @@ export function Profile() {
                           <MapPin className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
                             type="text"
-                            value={profilePersonalData.address}
+                            value={
+                              isEditing
+                                ? editingProfilePersonalData?.address
+                                : profilePersonalData?.address
+                            }
                             onChange={(e) =>
                               handlePersonalInputChange(
                                 "address",
                                 e.target.value
                               )
                             }
+                            placeholder="Enter your address..."
                             disabled={!isEditing}
                             className={`w-full !pl-10 !pr-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 capitalize ${
                               isEditing
@@ -500,13 +581,18 @@ export function Profile() {
                           <Globe className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
                             type="url"
-                            value={profilePersonalData.website}
+                            value={
+                              isEditing
+                                ? editingProfilePersonalData?.website
+                                : profilePersonalData?.website
+                            }
                             onChange={(e) =>
                               handlePersonalInputChange(
                                 "website",
                                 e.target.value
                               )
                             }
+                            placeholder="https://..."
                             disabled={!isEditing}
                             className={`w-full !pl-10 !pr-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 ${
                               isEditing
@@ -524,13 +610,18 @@ export function Profile() {
                           <Globe className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                           <input
                             type="url"
-                            value={profilePersonalData.linkedinUrl}
+                            value={
+                              isEditing
+                                ? editingProfilePersonalData?.linkedinUrl
+                                : profilePersonalData?.linkedinUrl
+                            }
                             onChange={(e) =>
                               handlePersonalInputChange(
                                 "linkedinUrl",
                                 e.target.value
                               )
                             }
+                            placeholder="https://..."
                             disabled={!isEditing}
                             className={`w-full !pl-10 !pr-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 ${
                               isEditing
@@ -547,7 +638,11 @@ export function Profile() {
                         Bio
                       </label>
                       <textarea
-                        value={profilePersonalData.bio}
+                        value={
+                          isEditing
+                            ? editingProfilePersonalData?.bio
+                            : profilePersonalData?.bio
+                        }
                         onChange={(e) =>
                           handlePersonalInputChange("bio", e.target.value)
                         }
@@ -573,7 +668,11 @@ export function Profile() {
                       </label>
                       <input
                         type="text"
-                        value={profileProfessionalData.currentRole}
+                        value={
+                          isEditing
+                            ? editingProfilProfessionalData?.currentRole
+                            : profileProfessionalData?.currentRole
+                        }
                         onChange={(e) =>
                           handleProfesssionalInputChange(
                             "currentRole",
@@ -581,6 +680,7 @@ export function Profile() {
                           )
                         }
                         disabled={!isEditing}
+                        placeholder="eg. software developer"
                         className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 capitalize ${
                           isEditing ? "cursor-pointer" : "cursor-not-allowed"
                         }`}
@@ -592,7 +692,11 @@ export function Profile() {
                       </label>
                       <input
                         type="text"
-                        value={profileProfessionalData.targetRole}
+                        value={
+                          isEditing
+                            ? editingProfilProfessionalData?.targetRole
+                            : profileProfessionalData?.targetRole
+                        }
                         onChange={(e) =>
                           handleProfesssionalInputChange(
                             "targetRole",
@@ -600,6 +704,7 @@ export function Profile() {
                           )
                         }
                         disabled={!isEditing}
+                        placeholder="eg. senior software developer"
                         className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 capitalize ${
                           isEditing ? "cursor-pointer" : "cursor-not-allowed"
                         }`}
@@ -611,24 +716,16 @@ export function Profile() {
                     <label className="block text-sm font-medium text-gray-700 !mb-2">
                       Experience Level
                     </label>
-                    <select
-                      value={profileProfessionalData.experience}
-                      onChange={(e) =>
-                        handleProfesssionalInputChange(
-                          "experience",
-                          e.target.value
-                        )
-                      }
+
+                    <Dropdown
+                      options={experienceLevels}
+                      value={isEditing ? editExperience : experience}
+                      onChange={setEditExperience}
+                      placeholder="How much experience you have..."
+                      size="lg"
                       disabled={!isEditing}
-                      className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 capitalize ${
-                        isEditing ? "cursor-pointer" : "cursor-not-allowed"
-                      }`}
-                    >
-                      <option value="entry">Entry Level (0-2 years)</option>
-                      <option value="mid">Mid Level (2-5 years)</option>
-                      <option value="senior">Senior Level (5-10 years)</option>
-                      <option value="lead">Lead/Principal (10+ years)</option>
-                    </select>
+                      variant="filled"
+                    />
                   </div>
 
                   <div>
@@ -636,7 +733,10 @@ export function Profile() {
                       Skills
                     </label>
                     <div className="flex flex-wrap gap-2 !mb-3">
-                      {profileProfessionalData.skills.map((skill, index) => (
+                      {(isEditing
+                        ? editingProfilProfessionalData
+                        : profileProfessionalData
+                      ).skills.map((skill, index) => (
                         <span
                           key={index}
                           className="!px-3 !py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full flex items-center !space-x-1 capitalize"
@@ -646,7 +746,7 @@ export function Profile() {
                             <button
                               onClick={() => {
                                 const newSkills =
-                                  profileProfessionalData.skills.filter(
+                                  editingProfilProfessionalData?.skills.filter(
                                     (_, i) => i !== index
                                   );
                                 handleProfesssionalInputChange(
@@ -670,7 +770,7 @@ export function Profile() {
                         onKeyPress={(e) => {
                           if (e.key === "Enter" && e.target.value.trim()) {
                             handleProfesssionalInputChange("skills", [
-                              ...profileProfessionalData.skills,
+                              ...editingProfilProfessionalData?.skills,
                               e.target.value.trim(),
                             ]);
                             e.target.value = "";
@@ -685,33 +785,34 @@ export function Profile() {
                       Target Companies
                     </label>
                     <div className="flex flex-wrap gap-2 !mb-3">
-                      {profileProfessionalData.targetCompanies.map(
-                        (company, index) => (
-                          <span
-                            key={index}
-                            className="!px-3 !py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center !space-x-1 capitalize"
-                          >
-                            <span>{company}</span>
-                            {isEditing && (
-                              <button
-                                onClick={() => {
-                                  const newCompanies =
-                                    profileProfessionalData.targetCompanies.filter(
-                                      (_, i) => i !== index
-                                    );
-                                  handleProfesssionalInputChange(
-                                    "targetCompanies",
-                                    newCompanies
+                      {(isEditing
+                        ? editingProfilProfessionalData
+                        : profileProfessionalData
+                      )?.targetCompanies.map((company, index) => (
+                        <span
+                          key={index}
+                          className="!px-3 !py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center !space-x-1 capitalize"
+                        >
+                          <span>{company}</span>
+                          {isEditing && (
+                            <button
+                              onClick={() => {
+                                const newCompanies =
+                                  editingProfilProfessionalData?.targetCompanies.filter(
+                                    (_, i) => i !== index
                                   );
-                                }}
-                                className="text-purple-600 hover:text-purple-800 cursor-pointer capitalize"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            )}
-                          </span>
-                        )
-                      )}
+                                handleProfesssionalInputChange(
+                                  "targetCompanies",
+                                  newCompanies
+                                );
+                              }}
+                              className="text-purple-600 hover:text-purple-800 cursor-pointer capitalize"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </span>
+                      ))}
                     </div>
                     {isEditing && (
                       <input
@@ -734,10 +835,10 @@ export function Profile() {
               )}
 
               {/* Preferences */}
-              {activeSection === "preferences" && (
+              {/* {activeSection === "preferences" && (
                 <div className="!p-6 !space-y-6 text-gray-700">
                   <div className="grid sm:grid-cols-2 gap-6">
-                    {/* <div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 !mb-2">Theme</label>
                       <select
                         value={preferences.theme}
@@ -748,7 +849,7 @@ export function Profile() {
                         <option value="dark">Dark</option>
                         <option value="auto">Auto</option>
                       </select>
-                    </div> */}
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 !mb-2">
                         Timezone
@@ -830,7 +931,7 @@ export function Profile() {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Notifications */}
               {activeSection === "notifications" && (
@@ -1025,12 +1126,24 @@ export function Profile() {
                         <input
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter current password"
-                          className="w-full !px-3 !py-2 !pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          disabled={isNotLocalLogin}
+                          className={`w-full !px-3 !py-2 !pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            isNotLocalLogin
+                              ? "cursor-not-allowed "
+                              : "cursor-pointer"
+                          }`}
                         />
                         <button
                           type="button"
+                          disabled={isNotLocalLogin}
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400  ${
+                            isNotLocalLogin
+                              ? "cursor-not-allowed "
+                              : "cursor-pointer hover:text-gray-600"
+                          }`}
                         >
                           {showPassword ? (
                             <EyeOff className="w-4 h-4" />
@@ -1049,7 +1162,14 @@ export function Profile() {
                         <input
                           type="password"
                           placeholder="Enter new password"
-                          className="w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          disabled={isNotLocalLogin}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            isNotLocalLogin
+                              ? "cursor-not-allowed "
+                              : "cursor-pointer"
+                          }`}
                         />
                       </div>
                       <div>
@@ -1059,12 +1179,27 @@ export function Profile() {
                         <input
                           type="password"
                           placeholder="Confirm new password"
-                          className="w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className={`w-full !px-3 !py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            isNotLocalLogin
+                              ? "cursor-not-allowed "
+                              : "cursor-pointer"
+                          }`}
+                          disabled={isNotLocalLogin}
                         />
                       </div>
                     </div>
 
-                    <button className="!px-4 !py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer">
+                    <button
+                      className={`!px-4 !py-2  text-white rounded-lg  transition-colors ${
+                        isNotLocalLogin
+                          ? "cursor-not-allowed bg-gray-300"
+                          : "cursor-pointer bg-indigo-600 hover:bg-indigo-700"
+                      }`}
+                      disabled={isNotLocalLogin}
+                      onClick={(e) => handelUpdatePassword(e)}
+                    >
                       Update Password
                     </button>
                   </div>

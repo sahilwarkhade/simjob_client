@@ -1,35 +1,43 @@
 import { useState } from "react";
 import { Upload, User, X } from "lucide-react";
-import { toast } from "react-toastify";
 import { updateUserProfileImage } from "../../services/apis/userApi";
+import { toast } from "react-toastify";
 
 const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
   const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
+  const processFile = (file) => {
     if (file && file.type.startsWith("image/")) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB limit.");
+        setSelectedFile(null);
+        setPreviewPhoto(null);
+        return;
+      }
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewPhoto(e.target.result);
       };
       reader.readAsDataURL(file);
+    } else {
+      toast.error("Please select an image file (PNG, JPG).");
+      setSelectedFile(null);
+      setPreviewPhoto(null);
     }
+  };
+
+  const handleFileSelect = (event) => {
+    processFile(event.target.files[0]);
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     setIsDragging(false);
-
-    const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewPhoto(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    processFile(event.dataTransfer.files[0]);
   };
 
   const handleDragOver = (event) => {
@@ -43,27 +51,40 @@ const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
   };
 
   const handleSave = async () => {
-    if (previewPhoto) {
+    if (selectedFile) {
+      setIsLoading(true);
       const formData = new FormData();
-      formData.append("profileImage", previewPhoto);
-      const response = await updateUserProfileImage(formData);
-      if (response?.data?.success) {
-        setCurrentPhoto(previewPhoto);
-        setIsModalOpen(false);
+      formData.append("profileImage", selectedFile);
+
+      try {
+        const response = await updateUserProfileImage(formData);
+        if (response?.data?.success) {
+          setCurrentPhoto(response?.data?.avatar || previewPhoto);
+          setIsModalOpen(false);
+        }
+      } catch (error) {
+        console.error("Error saving profile photo:", error);
+        toast.error("An error occurred while saving. Please try again.");
+      } finally {
+        setPreviewPhoto(null);
+        setSelectedFile(null);
+        setIsLoading(false);
       }
-      setPreviewPhoto(null);
     }
   };
 
   const handleCancel = () => {
     setPreviewPhoto(null);
+    setSelectedFile(null);
     setIsModalOpen(false);
   };
 
   const handleRemovePhoto = () => {
     setCurrentPhoto(null);
     setPreviewPhoto(null);
+    setSelectedFile(null);
   };
+
   return (
     <div className="fixed inset-0 bg-gray-700/50 bg-opacity-50 flex items-center justify-center !p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md !mx-4">
@@ -134,10 +155,11 @@ const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 !mt-6">
-            {currentPhoto && (
+            {currentPhoto && ( // Only show remove if there's a current photo
               <button
                 onClick={handleRemovePhoto}
                 className="flex-1 !px-4 !py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors font-medium cursor-pointer"
+                disabled={isLoading} // Disable while saving
               >
                 Remove Photo
               </button>
@@ -145,19 +167,20 @@ const ProfileModal = ({ currentPhoto, setCurrentPhoto, setIsModalOpen }) => {
             <button
               onClick={handleCancel}
               className="flex-1 !px-4 !py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+              disabled={isLoading} // Disable while saving
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              disabled={!previewPhoto}
+              disabled={!selectedFile || isLoading} // Disable if no file selected OR loading
               className={`flex-1 !px-4 !py-2 rounded-lg font-medium transition-colors ${
-                previewPhoto
-                  ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                !selectedFile || isLoading
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
               }`}
             >
-              Save Photo
+              {isLoading ? "Saving..." : "Save Photo"} {/* Show loader text */}
             </button>
           </div>
         </div>

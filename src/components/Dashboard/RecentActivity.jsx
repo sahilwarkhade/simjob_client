@@ -1,14 +1,26 @@
 import { CheckCircle, ChevronRight } from "lucide-react";
-import React from "react";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { DashboardContext } from "../../context/DashboardContext";
 
-const RecentActivity = ({recentSessions, setActiveTab}) => {
+const RecentActivity = ({ recentSessions, isUsingTab = true }) => {
+  const { setActiveTab } = useContext(DashboardContext);
+  const navigate = useNavigate();
+  const handleClick = () => {
+    if (isUsingTab) {
+      setActiveTab("history");
+    } else {
+      navigate("/dashboard");
+      setActiveTab("history");
+    }
+  };
   return (
     <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
       <div className="flex items-center justify-between !mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Recent Sessions</h3>
         <button
           className="text-indigo-600 hover:text-indigo-800 text-sm font-medium cursor-pointer"
-          onClick={() => setActiveTab("history")}
+          onClick={() => handleClick()}
         >
           View All
         </button>
@@ -17,7 +29,7 @@ const RecentActivity = ({recentSessions, setActiveTab}) => {
         {recentSessions.slice(0, 3).map((session) => (
           <div
             key={session.id}
-            className="flex items-center justify-between !p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-between !p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             <div className="flex-1">
               <div className="flex items-center !space-x-2 !mb-1">

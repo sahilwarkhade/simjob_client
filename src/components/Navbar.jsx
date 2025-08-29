@@ -47,7 +47,7 @@ const Navbar = () => {
           {!isLoggedIn ? (
             <button
               className="btn btn-primary"
-              onClick={() => navigate("/signup")}
+              onClick={() => navigate("/login")}
             >
               Get Started
             </button>
@@ -100,26 +100,18 @@ const Navbar = () => {
         >
           {isLoggedIn ? "Dashboard" : "Pricing"}
         </Link>
-        {!isLoggedIn ? (
-          <button
-            className="btn btn-primary !mt-2"
-            onClick={() => {
-              setIsOpen(false);
-              navigate("/signup");
-            }}
-          >
-            Get Started
-          </button>
-        ) : (
-          <Link to={"/profile"}>Profile</Link>
-        )}
+
+        {isLoggedIn && <Link to={"/profile"}>Profile</Link>}
+
         <Link to="/about" onClick={() => setIsOpen(false)}>
           About
         </Link>
+
         <Link to="/contactus" onClick={() => setIsOpen(false)}>
           Contact Us
         </Link>
-        {isLoggedIn && (
+
+        {isLoggedIn ? (
           <button
             className="btn btn-primary !mt-2"
             onClick={() => {
@@ -128,6 +120,16 @@ const Navbar = () => {
             }}
           >
             Log Out
+          </button>
+        ) : (
+          <button
+            className="btn btn-primary !mt-2"
+            onClick={() => {
+              setIsOpen(false);
+              navigate("/login");
+            }}
+          >
+            Get Started
           </button>
         )}
       </div>

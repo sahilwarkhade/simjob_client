@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import { BASE_URL } from "../constants";
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext();
 
@@ -10,7 +11,9 @@ export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    (async () => {
+    setLoading(true);
+    try {
+      (async () => {
       const response = await axios.get(`${BASE_URL}/check`, {
         withCredentials: true,
       });
@@ -19,6 +22,13 @@ export const AuthContextProvider = ({ children }) => {
         setIsLoggedIn(true);
       }
     })();
+    } catch (error) {
+      console.log("ERROR IN CHECKING USER");
+      toast.error('Reload the page')
+    }
+    finally{
+      setLoading(false)
+    }
   }, [isLoggedIn,setIsLoggedIn,user]);
 
   return (

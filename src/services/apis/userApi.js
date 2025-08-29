@@ -34,7 +34,7 @@ export const updateUserProfileImage = async (formData) => {
     }
 
     toast.success(response?.data?.message);
-    console.log("profile update ::", response);
+    return response;
   } catch (error) {
     console.log("ERROR in profile update :: ", error);
     toast.error(error?.response?.data?.message);
@@ -114,13 +114,14 @@ export const updatePassword = async (
     }
 
     toast.success(response?.data?.message);
-    navigate('/')
-    return response
+    navigate("/");
+    return response;
   } catch (error) {
-    console.log("ERROR in updating password :: ",error);
+    console.log("ERROR in updating password :: ", error);
     toast.error(error?.response?.data?.message);
   }
 };
+
 export const deleteAccount = async (setIsLoggedIn, navigate) => {
   try {
     const response = await apiConnector(

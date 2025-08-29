@@ -34,8 +34,9 @@ import {
 } from "../services/apis/userApi";
 import { Spinner } from "../components/Spinner/Spinner";
 import { Dropdown } from "../components/General/Dropdown";
-import { experienceLevels, genderOptions, skills } from "../constants";
+import { experienceLevels, genderOptions } from "../constants";
 import { useNavigate } from "react-router-dom";
+import { areValuesEqualOrEmpty } from "../utils/checkValues";
 
 const userStats = {
   totalMockSessions: 47,
@@ -149,7 +150,8 @@ const achievements = [
 
 export function Profile() {
   const navigate = useNavigate();
-  const { user, setUser, loading, setLoading, setIsLoggedIn} = useContext(AuthContext);
+  const { user, setUser, loading, setLoading, setIsLoggedIn } =
+    useContext(AuthContext);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPhoto, setCurrentPhoto] = useState(
@@ -209,10 +211,11 @@ export function Profile() {
   useEffect(() => {
     if (!user) {
       (async () => {
+        setLoading(true);
         await getUserProfile(setUser);
       })();
     }
-
+    // for personal
     if (user) {
       const userPersonalData = {
         fullName: user?.fullName || "",
@@ -228,7 +231,10 @@ export function Profile() {
       setProfilePersonalData({ ...userPersonalData });
 
       setGender(user?.additionalDetails?.personalInformation?.gender || "");
+      setCurrentPhoto(user?.avatar);
     }
+
+    // for professional
     if (user) {
       const userProfessionalData = {
         currentRole:
@@ -245,7 +251,6 @@ export function Profile() {
         user?.additionalDetails?.professionalInformation?.experienceLevel
       );
     }
-    setLoading(false);
   }, [user, setUser]);
 
   const handlePersonalInputChange = (field, value) => {
@@ -283,6 +288,32 @@ export function Profile() {
   const saveProfile = async (e) => {
     e.preventDefault();
     if (activeSection === "personal") {
+      const {
+        fullName,
+        email,
+        mobileNumber,
+        address,
+        website,
+        linkedinUrl,
+        bio,
+      } = profilePersonalData;
+
+      const originalData = editingProfilePersonalData || {};
+
+      if (
+        areValuesEqualOrEmpty(fullName, originalData.fullName) &&
+        areValuesEqualOrEmpty(email, originalData.email) &&
+        areValuesEqualOrEmpty(mobileNumber, originalData.mobileNumber) &&
+        areValuesEqualOrEmpty(address, originalData.address) &&
+        areValuesEqualOrEmpty(website, originalData.website) &&
+        areValuesEqualOrEmpty(linkedinUrl, originalData.linkedinUrl) &&
+        areValuesEqualOrEmpty(bio, originalData.bio) &&
+        areValuesEqualOrEmpty(gender?.id, editGender?.id)
+      ) {
+        setIsEditing(false);
+        return;
+      }
+
       const response = await updatePersonalProfileDetails({
         ...editingProfilePersonalData,
         gender: editGender?.label,
@@ -295,6 +326,40 @@ export function Profile() {
       }
     }
     if (activeSection === "professional") {
+      const { currentRole, targetRole, skills, targetCompanies } =
+        profileProfessionalData;
+
+      const originalData = editingProfilProfessionalData || {};
+      const originalSkills = originalData.skills.sort() || [];
+      const originalTargetCompanies = originalData.targetCompanies.sort() || [];
+
+      const currentSkills = skills.sort() || [];
+      const currentTargetCompanies = targetCompanies.sort() || [];
+
+      const isCurrentRoleEdited = currentRole !== originalData.currentRole;
+      const isTargetRoleEdited = targetRole !== originalData.targetRole;
+      const isExperienceLevelEdited = experience?.id !== editExperience?.id;
+
+      const hasSkillsArrayChanged =
+        originalSkills.length !== currentSkills.length ||
+        originalSkills.some((skill, index) => skill !== currentSkills[index]);
+
+      const hasTargetCompaniesArrayChanged =
+        originalTargetCompanies.length !== currentTargetCompanies.length ||
+        originalTargetCompanies.some(
+          (company, index) => company !== currentTargetCompanies[index]
+        );
+
+      if (
+        !isCurrentRoleEdited &&
+        !isTargetRoleEdited &&
+        !hasSkillsArrayChanged &&
+        !hasTargetCompaniesArrayChanged &&
+        !isExperienceLevelEdited
+      ) {
+        setIsEditing(false);
+        return;
+      }
       const response = await updateProfessionalProfileDetails({
         ...editingProfilProfessionalData,
         experience: editExperience?.label,
@@ -325,7 +390,7 @@ export function Profile() {
       confirmPassword,
       navigate
     );
-    console.log(response)
+    console.log(response);
     setLoading(false);
     setIsLoggedIn(true);
   };
@@ -1326,7 +1391,7 @@ export function Profile() {
               {activeSection === "overview" && (
                 <div className="!p-4 !space-y-5">
                   <QuickStats userStats={userStats} />
-                  <RecentActivity recentSessions={recentSessions} />
+                  <RecentActivity recentSessions={recentSessions} isUsingTab={false}/>
                 </div>
               )}
             </div>

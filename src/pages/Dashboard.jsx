@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useContext, useState } from "react";
 import {
   Mic,
   Brain,
@@ -20,20 +20,10 @@ import QuickStats from "../components/Dashboard/QuickStats";
 import RecentActivity from "../components/Dashboard/RecentActivity";
 import { MockInterviewForm } from "../components/Dashboard/MockInterviewForm";
 import { OaTest } from "../components/Dashboard/OaTest";
+import { DashboardContext } from "../context/DashboardContext";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Mock data
-
-  const userStats = {
-    totalMockSessions: 47,
-    averageMockScore: 8.2,
-    totalOASessions: 12,
-    averageOAScore: 7,
-    // improvedAreas: 3,
-    // streak: 7,
-  };
+  const {activeTab, setActiveTab} = useContext(DashboardContext)
 
   const recentSessions = [
     {
@@ -118,7 +108,7 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div className="!space-y-6">
             {/* Quick Stats */}
-            <QuickStats userStats={userStats} />
+            <QuickStats/>
 
             {/* Quick Actions */}
             <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
@@ -153,7 +143,6 @@ export default function Dashboard() {
               {/* Recent Sessions */}
               <RecentActivity
                 recentSessions={recentSessions}
-                setActiveTab={setActiveTab}
               />
 
               {/* <UpcomingInterviews /> */}

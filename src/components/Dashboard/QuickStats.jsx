@@ -1,7 +1,19 @@
 import { Star, Target } from "lucide-react";
-import React from "react";
+import { useContext, useEffect } from "react";
+import { OverviewContext } from "../../context/OverviewContext";
+import { getUserStats } from "../../services/apis/dashboardApi";
 
-const QuickStats = ({userStats}) => {
+const QuickStats = () => {
+  const { userStats,setUserStats } = useContext(OverviewContext);
+  
+    useEffect(() => {
+      if(!userStats){
+        (async () => {
+          await getUserStats(setUserStats);
+        })()
+      }
+    }, [userStats]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 !gap-6">
       <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
@@ -11,7 +23,7 @@ const QuickStats = ({userStats}) => {
               Total Mock Sessions
             </p>
             <p className="text-2xl font-bold text-gray-900">
-              {userStats.totalMockSessions}
+              {userStats ? userStats?.totalMockInterviews : '--'}
             </p>
           </div>
           <div className="bg-indigo-100 !p-3 rounded-lg">
@@ -28,7 +40,7 @@ const QuickStats = ({userStats}) => {
               Average Mock Score
             </p>
             <p className="text-2xl font-bold text-gray-900">
-              {userStats.averageMockScore}/10
+              {userStats ? userStats?.averageMockScore : '--'}/10
             </p>
           </div>
           <div className="bg-purple-100 !p-3 rounded-lg">
@@ -47,7 +59,7 @@ const QuickStats = ({userStats}) => {
             </p>
             <p className="text-2xl font-bold text-gray-900">
               {/* {userStats.improvedAreas} */}
-              {userStats.totalOASessions}
+              {userStats ? userStats?.totalOaTests : '--'}
             </p>
           </div>
           <div className="bg-green-100 !p-3 rounded-lg">
@@ -68,7 +80,7 @@ const QuickStats = ({userStats}) => {
             </p>
             <p className="text-2xl font-bold text-gray-900">
               {/* {userStats.streak} days */}
-              {userStats.averageOAScore}/10
+              {userStats ? userStats?.averageOaScore : '--'}/10
             </p>
           </div>
           <div className="bg-orange-100 !p-3 rounded-lg">

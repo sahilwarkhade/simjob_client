@@ -11,27 +11,33 @@ import { Profile } from "./pages/Profile";
 import { OATestProblem } from "./pages/OATestProblem";
 import AllTestProblems from "./pages/AllTestProblems";
 import { ForgetPassword } from "./pages/Auth/ForgetPassword";
+import { OverviewContextProvider } from "./context/OverviewContext";
+import { DashboardContextProvider } from "./context/DashboardContext";
 
 function App() {
   return (
     <AuthContextProvider>
-      <div className="app">
-        {/* <NavbarLayout /> */}
-        <Routes>
-          <Route path="/" element={<NavbarLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/contactus" element={<ContactUs />} />
-            <Route path="signup" element={<SignUpPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-            <Route path="/test/problem" element={<AllTestProblems />} />
-            <Route path="/test/problem/:id" element={<OATestProblem />} />
-            <Route path="/forget-password" element={<ForgetPassword/>} />
-        </Routes>
-      </div>
+      <OverviewContextProvider>
+        <DashboardContextProvider>
+          <div className="app">
+            {/* <NavbarLayout /> */}
+            <Routes>
+              <Route path="/" element={<NavbarLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/contactus" element={<ContactUs />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+              <Route path="/test/problem" element={<AllTestProblems />} />
+              <Route path="/test/problem/:id" element={<OATestProblem />} />
+              <Route path="/forget-password" element={<ForgetPassword />} />
+            </Routes>
+          </div>
+        </DashboardContextProvider>
+      </OverviewContextProvider>
     </AuthContextProvider>
   );
 }

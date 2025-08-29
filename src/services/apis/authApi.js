@@ -21,6 +21,7 @@ export const continueWithGoogle = async (idToken, navigate, setIsLoggedIn) => {
     toast.error("Failed to continue with google");
   }
 };
+
 export const continueWithGitHub = async () => {
   const authUrl = `https://github.com/login/oauth/authorize?client_id=${"Ov23liR2RpGlqlV3Jnz1"}&scope=user:email&redirect_uri=${"http://localhost:4000/api/v1/auth/github/callback"}`;
   window.location.href = authUrl;
@@ -100,8 +101,6 @@ export const registerUser = async (formData, navigate) => {
       throw new Error(response?.data?.message);
     }
 
-    // toast.success("User Signed Up successfully");
-    // navigate('/')
     return response;
   } catch (error) {
     console.log("ERROR in registering user :: ", error);
@@ -128,7 +127,6 @@ export const loginUser = async (formData) => {
     );
 
     if (!response?.data?.success) {
-      toast.error(response?.data?.message);
       throw new Error(response?.data?.message);
     }
     console.log(response?.data);

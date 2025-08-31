@@ -1,5 +1,4 @@
-// src/components/Console.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export const Console = () => {
   const [activeTab, setActiveTab] = useState('testcase');
@@ -45,11 +44,11 @@ export const Console = () => {
           <div>
             <p className="text-neutral-400">Run code to see the result.</p>
             {/* Example of a success result */}
-            {/* <div className="text-green-500 font-bold">Accepted</div>
+            <div className="text-green-500 font-bold">Accepted</div>
             <div className="mt-2">
                 <p>Output: <span className="text-white">[0,1]</span></p>
                 <p>Expected: <span className="text-white">[0,1]</span></p>
-            </div> */}
+            </div>
           </div>
         )}
       </div>

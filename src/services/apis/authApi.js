@@ -184,6 +184,6 @@ export const logout = async (setIsLoggedIn) => {
     toast.success("Logout successfully");
   } catch (error) {
     console.log("ERROR in LOGOUT :: ", error);
-    toast.error(error.message);
+    toast.error(error?.response?.data?.message);
   }
 };

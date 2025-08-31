@@ -1,31 +1,19 @@
 import { AlertTriangle, CheckCircle, Clock, Send } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useBlocker } from "../hooks/useBlocker";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getSections } from "../services/apis/oaTestApi";
+
+const MCQTypes = ["single_choice", "multiple_choice", "text"];
 const AllTestProblems = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const testid = searchParams.get("testid");
   const [timeLeft, setTimeLeft] = useState(3600);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const sections = [
-    {
-      id: 1,
-      section_name: "Data Structures and Algorithm",
-      type: "coding",
-      question: [
-        { id: 2, question_title: "Two Sum", difficulty: "medium" },
-        {
-          id: 3,
-          question_title: "Longest Common subsequence",
-          difficulty: "hard",
-        },
-      ],
-      no_of_questions: 2,
-    },
-    {
-      id: 4,
-      section_name: "Computer Science Fundamentals",
-      type: "mcq",
-    },
-  ];
+  const [sections, setSections] = useState([]);
+  const [programmingLanguages, setProgrammingLanguages] = useState(null);
 
   useBlocker();
 
@@ -38,6 +26,16 @@ const AllTestProblems = () => {
     }
   }, [timeLeft, isSubmitted]);
 
+  useEffect(() => {
+    (async () => {
+      const response = await getSections(testid, setSections);
+      if (response?.data?.success)
+        setProgrammingLanguages(response?.data?.programmingLanguages);
+
+      console.log(response);
+    })();
+  }, []);
+
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -48,6 +46,15 @@ const AllTestProblems = () => {
         .padStart(2, "0")}`;
     }
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleCodingQuestionStart = async (event, sectionId, questionId) => {
+    event.preventDefault();
+
+    navigate(
+      `/test/section/question?testid=${testid}&sectionid=${sectionId}&questionid=${questionId}`,
+      { state: programmingLanguages }
+    );
   };
 
   if (isSubmitted) {
@@ -131,7 +138,6 @@ const AllTestProblems = () => {
                 width: `${
                   /*(getTotalAnswered() / getTotalQuestions())*/ 0.2 * 100
                 }%`,
-
               }}
             ></div>
           </div>
@@ -140,51 +146,64 @@ const AllTestProblems = () => {
       {/* sections */}
       <div className="!mt-1 w-7xl min-h-[60vh] flex flex-col items-center !space-y-2.5 shadow-xl rounded-lg overflow-hidden">
         <div className="w-full !space-y-1.5">
-          {sections?.map((section, index) => {
-            return (
-              <div className="">
-                <div className="bg-gray-200/40 flex justify-between !p-5">
-                  <h3 className=" font-medium ">
-                    {index + 1 + "]."} {section.section_name}
-                  </h3>
-                  {section?.type === "mcq" && (
-                    <button className="bg-green-600 !px-5 text-white font-semibold rounded !py-1.5 cursor-pointer">
-                      {" "}
-                      Start Section
-                    </button>
-                  )}
-                </div>
-                {section?.type === "coding" &&
-                  section?.question?.map((question, index) => {
-                    return (
-                      <div className="!px-10 !py-4 flex justify-between">
-                        <div className="flex gap-x-3">
-                          <p className="text-md font-medium capitalize">
-                            <span>{index + 1 + ")."}</span>
-                            {"  "}
-                            {question?.question_title}
-                          </p>
-                          <span
-                            className={`text-sm text-center border h-6 !px-1.5 rounded-2xl capitalize ${
-                              question?.difficulty === "easy"
-                                ? "bg-green-500"
-                                : question?.difficulty === "medium"
-                                ? "bg-amber-600"
-                                : "bg-red-700"
-                            }`}
+          {sections.length > 0 &&
+            sections?.map((section, index) => {
+              return (
+                <div className="" key={section?._id}>
+                  <div className="bg-gray-200/40 flex justify-between !p-5">
+                    <h3 className=" font-medium ">
+                      {index + 1 + "]."} {section?.section_name}
+                    </h3>
+                    {MCQTypes.includes(section?.section_type) && (
+                      <button className="bg-green-600 !px-5 text-white font-semibold rounded !py-1.5 cursor-pointer">
+                        {" "}
+                        Start Section
+                      </button>
+                    )}
+                  </div>
+                  {section?.section_type === "coding" &&
+                    section?.section_questions.map((question, index) => {
+                      return (
+                        <div
+                          className="!px-10 !py-4 flex justify-between"
+                          key={question?.question_id}
+                        >
+                          <div className="flex gap-x-3">
+                            <p className="text-md font-medium capitalize">
+                              <span>{index + 1 + ")."}</span>
+                              {"  "}
+                              {question?.question_title}
+                            </p>
+                            <span
+                              className={`text-sm text-center border h-6 !px-1.5 rounded-2xl capitalize ${
+                                question?.difficulty === "easy"
+                                  ? "bg-green-500"
+                                  : question?.difficulty === "medium"
+                                  ? "bg-amber-600"
+                                  : "bg-red-700"
+                              }`}
+                            >
+                              {question?.difficulty || "Easy"}
+                            </span>
+                          </div>
+                          <button
+                            className="bg-green-600 !px-4 text-white font-semibold rounded !py-1 cursor-pointer"
+                            onClick={(event) =>
+                              handleCodingQuestionStart(
+                                event,
+                                section?._id,
+                                question?.question_id
+                              )
+                            }
                           >
-                            {question?.difficulty}
-                          </span>
+                            Start
+                          </button>
                         </div>
-                        <button className="bg-green-600 !px-4 text-white font-semibold rounded !py-1 cursor-pointer">
-                          Start
-                        </button>
-                      </div>
-                    );
-                  })}
-              </div>
-            );
-          })}
+                      );
+                    })}
+                </div>
+              );
+            })}
         </div>
       </div>
 

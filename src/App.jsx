@@ -13,6 +13,7 @@ import AllTestProblems from "./pages/AllTestProblems";
 import { ForgetPassword } from "./pages/Auth/ForgetPassword";
 import { OverviewContextProvider } from "./context/OverviewContext";
 import { DashboardContextProvider } from "./context/DashboardContext";
+import { InterviewView } from "./pages/Interview";
 
 function App() {
   return (
@@ -31,9 +32,10 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
-              <Route path="/test/problem" element={<AllTestProblems />} />
-              <Route path="/test/problem/:id" element={<OATestProblem />} />
+              <Route path="/test" element={<AllTestProblems />} />
+              <Route path="/test/section/question" element={<OATestProblem />} />
               <Route path="/forget-password" element={<ForgetPassword />} />
+              <Route path="/interview" element={<InterviewView />} />
             </Routes>
           </div>
         </DashboardContextProvider>

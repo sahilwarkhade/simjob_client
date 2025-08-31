@@ -1,13 +1,26 @@
-import {
-  Panel,
-  PanelGroup,
-  PanelResizeHandle,
-} from "react-resizable-panels";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { CodeEditorPanel } from "../components/OATestProblem/CodeEditorPanel";
 import { ProblemDescription } from "../components/OATestProblem/ProblemDescription";
-import { problem } from "../constants";
+import { useEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { getQuestion } from "../services/apis/oaTestApi";
 
 export function OATestProblem() {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const testId = searchParams.get("testid");
+  const sectionId = searchParams.get("sectionid");
+  const questionId = searchParams.get("questionid");
+  const [problem, setProblem] = useState(null);
+  const [question, setQuestion] = useState(null);
+  let programmingLanguages;
+  useEffect(() => {
+    (async () => {
+      const response=await getQuestion(testId, sectionId, questionId, setProblem);
+      programmingLanguages=location.state;
+      setQuestion(response?.data?.question)
+    })();
+  }, [location.state]);
   return (
     <div className="min-h-screen bg-neutral-900 text-white font-sans">
       {/* We can add a top navbar here later if needed */}
@@ -18,7 +31,9 @@ export function OATestProblem() {
           </Panel>
           <PanelResizeHandle className="panel-handle" />
           <Panel defaultSize={55} minSize={30}>
-            <CodeEditorPanel boilerplate={problem.boilerplate} />
+            {question && (
+              <CodeEditorPanel question={question} boilerplate={problem?.starter_code[0]} programmingLanguages={programmingLanguages} />
+            )}
           </Panel>
         </PanelGroup>
       </main>

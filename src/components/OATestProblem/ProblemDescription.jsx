@@ -39,26 +39,43 @@ export const ProblemDescription = ({ problem }) => {
       </div>
 
       <div className="!mt-6 !space-y-4">
-        {problem?.test_cases?.visible.map((t, index) => (
-          <div key={t?.test_case_id}>
-            <p className="font-semibold">Example {index + 1}:</p>
-            <div className="code-block">
-              <p>
-                <strong className="text-neutral-400">Input:</strong> {t?.input}
-              </p>
-              <p>
-                <strong className="text-neutral-400">Output:</strong>{" "}
-                {t?.expected_output}
-              </p>
-              {t.explanation && (
+        {problem?.test_cases?.visible.map((t, index) => {
+          let obj = {};
+          if (t?.input) {
+            obj = JSON.parse(t?.input);
+          }
+          return (
+            <div key={t?.test_case_id}>
+              <p className="font-semibold">Example {index + 1}:</p>
+              <div className="code-block">
                 <p>
-                  <strong className="text-neutral-400">Explanation:</strong>{" "}
-                  {t?.explanation}
+                  <strong className="text-neutral-400">Input:</strong>{" "}
+                  {Object.keys(obj).map((key) => (
+                    <div key={key} className="!py-1.5">
+                      <span className="text-white !mb-1.5">{key} = </span>
+                      <div className="bg-neutral-900 !p-3 rounded">
+                        {" "}
+                        {JSON.stringify(obj[key], null, 1)}{" "}
+                      </div>
+                    </div>
+                  ))}
                 </p>
-              )}
+                <p>
+                  <strong className="text-neutral-400">Output:</strong>{" "}
+                  <div className="bg-neutral-900 !p-3 rounded">
+                    {t?.expected_output}{" "}
+                  </div>
+                </p>
+                {t.explanation && (
+                  <p>
+                    <strong className="text-neutral-400">Explanation:</strong>{" "}
+                    {t?.explanation}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="!mt-6">

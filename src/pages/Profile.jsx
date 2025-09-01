@@ -438,11 +438,11 @@ export function Profile() {
                     <Camera className="w-3 h-3 text-gray-600" />
                   </button>
                 </div>
-                <h3 className="font-semibold text-gray-900">
-                  {profilePersonalData.fullName}
+                <h3 className="font-semibold text-gray-900 capitalize">
+                  {profilePersonalData?.fullName}
                 </h3>
                 <p className="text-sm text-gray-600 capitalize">
-                  {profileProfessionalData.currentRole}
+                  {profileProfessionalData?.currentRole}
                 </p>
               </div>
 

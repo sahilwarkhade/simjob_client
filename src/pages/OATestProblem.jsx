@@ -26,13 +26,13 @@ export function OATestProblem() {
       {/* We can add a top navbar here later if needed */}
       <main className="h-screen w-screen !p-2">
         <PanelGroup direction="horizontal">
-          <Panel defaultSize={30} minSize={0}>
+          <Panel defaultSize={33} minSize={0}>
             <ProblemDescription problem={problem} />
           </Panel>
           <PanelResizeHandle className="panel-handle" />
-          <Panel defaultSize={55} minSize={30}>
+          <Panel defaultSize={67} minSize={30}>
             {question && (
-              <CodeEditorPanel question={question} boilerplate={problem?.starter_code[0]} programmingLanguages={programmingLanguages} />
+              <CodeEditorPanel question={question} boilerplate={problem?.starter_code} programmingLanguages={programmingLanguages} />
             )}
           </Panel>
         </PanelGroup>

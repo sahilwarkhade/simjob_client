@@ -46,7 +46,7 @@ export const ForgetPassword = () => {
       setResendBtnLoading(true);
     }
     try {
-      await verifyEmail(email, "forget");
+      await verifyEmail(email, "forget-password");
       setStartEmailVerfication(true);
       setCountdown(INITIAL_COUNT);
       setResendBtnLoading(false);

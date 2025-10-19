@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Mail,
-  Phone,
   MapPin,
   MessageCircle,
   Send,
@@ -15,19 +14,20 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Dropdown } from "../components/General/Dropdown";
 import { inquiryTypes } from "../constants";
+import { contactUs } from "../services/apis/userApi";
 
 export default function ContactUs() {
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     subject: "",
     message: "",
   });
-  const [inquiryType,setInquiryType]=useState(null)
+  const [inquiryType, setInquiryType] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const navigate=useNavigate();
-  const {token}=useContext(AuthContext)
+  const navigate = useNavigate();
+  const { isLoggedIn } = useContext(AuthContext);
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -40,19 +40,12 @@ export default function ContactUs() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-    }, 1000*60*60*24);
+    console.log(formData, inquiryType);
+    formData.query = inquiryType?.label;
+
+    await contactUs(formData, setIsSubmitted);
   };
 
   const contactMethods = [
@@ -177,7 +170,7 @@ export default function ContactUs() {
             </h2>
 
             {isSubmitted ? (
-              <div className="text-center !py-12 sm:!py-16">
+              <div className="flex flex-col items-center justify-center text-center !py-12 sm:!py-16">
                 <div className="bg-green-500 rounded-full w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto !mb-6">
                   <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
@@ -190,25 +183,25 @@ export default function ContactUs() {
                 </p>
               </div>
             ) : (
-              <form onSubmit={(e)=>handleSubmit(e)}>
+              <form onSubmit={(e) => handleSubmit(e)}>
                 <div className="!space-y-6">
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div>
                       <label
-                        htmlFor="name"
+                        htmlFor="fullName"
                         className="block text-sm sm:text-base font-medium text-gray-700 !mb-2"
                       >
                         Full Name *
                       </label>
                       <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleInputChange}
                         required
-                        className="w-full !px-4 !py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
-                        placeholder="Your full name"
+                        className="w-full !px-4 !py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
+                        placeholder="Full Name"
                       />
                     </div>
                     <div>
@@ -225,8 +218,8 @@ export default function ContactUs() {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="w-full !px-4 !py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
-                        placeholder="your.email@example.com"
+                        className="w-full !px-4 !py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
+                        placeholder="Enter email...."
                       />
                     </div>
                   </div>
@@ -253,12 +246,12 @@ export default function ContactUs() {
                     </select>
                   </div> */}
                   <Dropdown
-                  label={'Inquiry Type'}
-                  options={inquiryTypes}
-                  value={inquiryType}
-                  onChange={setInquiryType}
-                  placeholder="select inquiry type..."
-                  required
+                    label={"Inquiry Type"}
+                    options={inquiryTypes}
+                    value={inquiryType}
+                    onChange={setInquiryType}
+                    placeholder="Select inquiry type..."
+                    required
                   />
                   <div>
                     <label
@@ -274,7 +267,7 @@ export default function ContactUs() {
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
-                      className="w-full !px-4 !py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
+                      className="w-full !px-4 !py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300 text-sm sm:text-base text-gray-700"
                       placeholder="Brief description of your inquiry"
                     />
                   </div>
@@ -514,7 +507,10 @@ export default function ContactUs() {
             Don't wait for your next interview to practice. Start improving your
             skills today with SimJob.
           </p>
-          <button className="group bg-white text-indigo-600 !px-6 sm:!px-8 !py-3 sm:!py-4 rounded-full font-bold text-base sm:text-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 inline-flex items-center shadow-lg cursor-pointer" onClick={()=>navigate(token ? "/dashboard" : "/signup")}>
+          <button
+            className="group bg-white text-indigo-600 !px-6 sm:!px-8 !py-3 sm:!py-4 rounded-full font-bold text-base sm:text-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 inline-flex items-center shadow-lg cursor-pointer"
+            onClick={() => navigate(isLoggedIn ? "/dashboard" : "/signup")}
+          >
             Try SimJob Free
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 !ml-2 group-hover:translate-x-1 transition-transform duration-300" />
           </button>

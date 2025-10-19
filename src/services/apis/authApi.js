@@ -172,18 +172,7 @@ export const forgetPassword = async (
   }
 };
 
-export const logout = async (setIsLoggedIn) => {
-  try {
-    const response = await apiConnector("POST", `${BASE_URL}/auth/logout`);
-    if (!response?.data?.success) {
-      toast.error("Somthing went wrong, please try after sometime");
-      return;
-    }
-
-    setIsLoggedIn(false);
-    toast.success("Logout successfully");
-  } catch (error) {
-    console.log("ERROR in LOGOUT :: ", error);
-    toast.error(error?.response?.data?.message);
-  }
+export const logout = async () => {
+  const response = await apiConnector("POST", `${BASE_URL}/auth/logout`);
+  return response;
 };

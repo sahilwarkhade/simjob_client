@@ -1,3 +1,5 @@
+export const BASE_URL = "http://localhost:4000/api/v1";
+
 export const companies = [
   { id: 1, value: "abb", label: "ABB" },
   { id: 2, value: "abbyy", label: "ABBYY" },
@@ -372,14 +374,15 @@ export const programmingLanguages = [
   { id: 10, label: "Swift", value: "swift" },
   { id: 11, label: "Kotlin", value: "kotlin" },
   { id: 12, label: "Rust", value: "rust" },
-  { id: 13, label: "Scala", value: "scala" },
-  { id: 14, label: "Dart", value: "dart" },
-  { id: 15, label: "Perl", value: "perl" },
-  { id: 16, label: "Haskell", value: "haskell" },
-  { id: 17, label: "Elixir", value: "elixir" },
   { id: 18, label: "C", value: "c" },
-  { id: 19, label: "MATLAB", value: "matlab" },
   { id: 20, label: "R", value: "r" },
+];
+
+export const historyOptions = [
+  { id: 1, label: "All", value: "all_sessions" },
+  { id: 2, label: "Interview", value: "interview_sessions" },
+  { id: 3, label: "OATest", value: "oatest_sessions" },
+  { id: 4, label: "Pending", value: "pending_sessions" },
 ];
 
 export const roles = [
@@ -395,9 +398,9 @@ export const roles = [
   { id: 10, label: "AI Engineer", value: "ai_engineer" },
   { id: 11, label: "QA Engineer / Tester", value: "qa_engineer" },
   { id: 12, label: "UI/UX Designer", value: "ui_ux_designer" },
-  { id: 13, label: "Database Administrator", value: "database_admin" },
+  { id: 13, label: "Database Administrator", value: "database_administrator" },
   { id: 14, label: "Cybersecurity Analyst", value: "cybersecurity_analyst" },
-  { id: 15, label: "System Administrator", value: "system_admin" },
+  { id: 15, label: "System Administrator", value: "system_administrator" },
   { id: 16, label: "Network Engineer", value: "network_engineer" },
   {
     id: 17,
@@ -410,13 +413,13 @@ export const roles = [
 ];
 
 export const experienceLevels = [
-  { id: 1, label: "Internship", value: "internship" },
-  { id: 2, label: "Entry Level (0-1 years)", value: "entry_level" },
-  { id: 3, label: "Junior (1-3 years)", value: "junior" },
-  { id: 4, label: "Mid-Level (3-5 years)", value: "mid_level" },
-  { id: 5, label: "Senior (5-8 years)", value: "senior" },
-  { id: 6, label: "Lead (8-12 years)", value: "lead" },
-  { id: 7, label: "Principal (12+ years)", value: "principal" },
+  { id: 1, label: "Internship", value: "Internship" },
+  { id: 2, label: "Entry Level (0-1 years)", value: "Entry Level" },
+  { id: 3, label: "Junior (1-3 years)", value: "Junior" },
+  { id: 4, label: "Mid-Level (3-5 years)", value: "Mid Level" },
+  { id: 5, label: "Senior (5-8 years)", value: "Senior" },
+  { id: 6, label: "Lead (8-12 years)", value: "Lead" },
+  { id: 7, label: "Principal (12+ years)", value: "Principal" },
 ];
 
 export const focusAreas = [
@@ -590,7 +593,7 @@ export const skills = [
 
 export const testSections = [
   { id: 1, value: "aptitude", label: "Aptitude" },
-  { id: 2, value: "coding", label: "Coding" },
+  { id: 2, value: "dsa", label: "Data Structures and Algorithms" },
   { id: 3, value: "computerscience", label: "Computer Science" },
   { id: 4, value: "databasequeries", label: "Database Queries" },
   { id: 5, value: "english", label: "English" },
@@ -624,60 +627,25 @@ export const inquiryTypes = [
   { id: 18, value: "upgrade", label: "Upgrade Plan" },
 ];
 
-export const problem = {
-  id: "2sum",
-  title: "1. Two Sum",
-  difficulty: "Easy",
-  description: [
-    "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.",
-    "You may assume that each input would have exactly one solution, and you may not use the same element twice.",
-    "You can return the answer in any order.",
-  ],
-  examples: [
-    {
-      input: "nums = [2,7,11,15], target = 9",
-      output: "[0,1]",
-      explanation: "Because nums[0] + nums[1] == 9, we return [0, 1].",
-    },
-    {
-      input: "nums = [3,2,4], target = 6",
-      output: "[1,2]",
-    },
-    {
-      input: "nums = [3,3], target = 6",
-      output: "[0,1]",
-    },
-  ],
-  constraints: [
-    "`2 <= nums.length <= 10^4`",
-    "`-10^9 <= nums[i] <= 10^9`",
-    "`-10^9 <= target <= 10^9`",
-    "**Only one valid answer exists.**",
-  ],
-  boilerplate: {
-    javascript: `/**
- * @param {number[]} nums
- * @param {number} target
- * @return {number[]}
- */
-var twoSum = function(nums, target) {
-    
-};`,
-    python: `class Solution:
-    def twoSum(self, nums: List[int], target: int) -> List[int]:
-        `,
-    java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        
-    }
-}`,
-  },
-};
-
-export const BASE_URL = "http://localhost:4000/api/v1";
-
 export const genderOptions = [
   { id: 1, value: "male", label: "Male" },
-  { id: 1, value: "female", label: "Female" },
-  { id: 1, value: "other", label: "other" },
+  { id: 2, value: "female", label: "Female" },
+  { id: 3, value: "prefer not to say", label: "Prefer not to say" },
 ];
+
+export const JUDGE0_LANGUAGE_ID_TO_NAME_MAP = {
+  javascript: 93,
+  python: 71,
+  java: 62,
+  cpp: 54,
+  csharp: 86,
+  typescript: 74,
+  go: 101,
+  ruby: 72,
+  php: 68,
+  swift: 83,
+  kotlin: 78,
+  rust: 94,
+  c: 50,
+  r: 80,
+};

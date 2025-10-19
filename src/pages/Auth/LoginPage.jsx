@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGithub } from "react-icons/fa";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -41,9 +41,11 @@ const LoginPage = () => {
     }
   };
 
-  if (isLoggedIn) {
-    navigate("/");
-  }
+  useEffect(()=>{
+    if(isLoggedIn){
+      navigate('/')
+    }
+  },[isLoggedIn])
 
   if (loading) {
     return (

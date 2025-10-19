@@ -1,18 +1,31 @@
 import { Star, Target } from "lucide-react";
-import { useContext, useEffect } from "react";
-import { OverviewContext } from "../../context/OverviewContext";
 import { getUserStats } from "../../services/apis/dashboardApi";
+import { useQuery } from "@tanstack/react-query";
+import { Spinner } from "../Spinner/Spinner";
+import ErrorPage from "../../pages/ErrorPage";
 
 const QuickStats = () => {
-  const { userStats,setUserStats } = useContext(OverviewContext);
-  
-    useEffect(() => {
-      if(!userStats){
-        (async () => {
-          await getUserStats(setUserStats);
-        })()
-      }
-    }, [userStats]);
+  const {
+    data: userStats,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["user-stats"],
+    queryFn: getUserStats,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-white flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <ErrorPage error={error.message} />;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 !gap-6">
@@ -23,7 +36,7 @@ const QuickStats = () => {
               Total Mock Sessions
             </p>
             <p className="text-2xl font-bold text-gray-900">
-              {userStats ? userStats?.totalMockInterviews : '--'}
+              {userStats ? userStats?.totalMockInterviews : "--"}
             </p>
           </div>
           <div className="bg-indigo-100 !p-3 rounded-lg">
@@ -40,7 +53,7 @@ const QuickStats = () => {
               Average Mock Score
             </p>
             <p className="text-2xl font-bold text-gray-900">
-              {userStats ? userStats?.averageMockScore : '--'}/10
+              {userStats ? Number(userStats?.averageMockScore).toPrecision(3) : "--"}/10
             </p>
           </div>
           <div className="bg-purple-100 !p-3 rounded-lg">
@@ -59,7 +72,7 @@ const QuickStats = () => {
             </p>
             <p className="text-2xl font-bold text-gray-900">
               {/* {userStats.improvedAreas} */}
-              {userStats ? userStats?.totalOaTests : '--'}
+              {userStats ? userStats?.totalOaTests : "--"}
             </p>
           </div>
           <div className="bg-green-100 !p-3 rounded-lg">
@@ -80,7 +93,7 @@ const QuickStats = () => {
             </p>
             <p className="text-2xl font-bold text-gray-900">
               {/* {userStats.streak} days */}
-              {userStats ? userStats?.averageOaScore : '--'}/10
+              {userStats ? Number(userStats?.averageOaScore).toPrecision(3) : "--"}/10
             </p>
           </div>
           <div className="bg-orange-100 !p-3 rounded-lg">

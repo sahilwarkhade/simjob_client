@@ -37,45 +37,10 @@ import { Dropdown } from "../components/General/Dropdown";
 import { experienceLevels, genderOptions } from "../constants";
 import { useNavigate } from "react-router-dom";
 import { areValuesEqualOrEmpty } from "../utils/checkValues";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import ErrorPage from "./ErrorPage";
 
-const userStats = {
-  totalMockSessions: 47,
-  averageMockScore: 8.2,
-  totalOASessions: 12,
-  averageOAScore: 7,
-};
-const recentSessions = [
-  {
-    id: 1,
-    company: "Google",
-    role: "Software Engineer",
-    date: "2025-01-10",
-    duration: "25 min",
-    score: 8.5,
-    status: "completed",
-    feedback: "Great technical responses, work on behavioral questions",
-  },
-  {
-    id: 2,
-    company: "Microsoft",
-    role: "Product Manager",
-    date: "2025-01-09",
-    duration: "30 min",
-    score: 7.8,
-    status: "completed",
-    feedback: "Strong product thinking, improve on leadership examples",
-  },
-  {
-    id: 3,
-    company: "Amazon",
-    role: "Data Scientist",
-    date: "2025-01-08",
-    duration: "22 min",
-    score: 8.9,
-    status: "completed",
-    feedback: "Excellent problem-solving approach",
-  },
-];
 const sections = [
   {
     id: "personal",
@@ -150,7 +115,7 @@ const achievements = [
 
 export function Profile() {
   const navigate = useNavigate();
-  const { user, setUser, loading, setLoading, setIsLoggedIn } =
+  const { setUser, loading, setLoading, isLoggedIn, setIsLoggedIn } =
     useContext(AuthContext);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -208,13 +173,52 @@ export function Profile() {
     feedbackDetail: "detailed",
   });
 
+  const {
+    data: user,
+    isLoding,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["user-profile", { isLoggedIn, setIsLoggedIn }],
+    queryFn: getUserProfile,
+    enabled: !!isLoggedIn,
+  });
+
+  const queryClient = useQueryClient();
+
+  const personalProfileMutation = useMutation({
+    mutationFn: (updatedProfile) =>
+      updatePersonalProfileDetails(updatedProfile),
+    onSuccess: (response) => {
+      setGender(editGender);
+      setProfilePersonalData(editingProfilePersonalData);
+      setIsEditing(false);
+      toast.success(response?.data?.message);
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const professionalProfileMutation = useMutation({
+    mutationFn: (updatedProfile) =>
+      updateProfessionalProfileDetails(updatedProfile),
+    onSuccess: (response) => {
+      setProfileProfessionalData(editingProfilProfessionalData);
+      setExperience(editExperience);
+      setIsEditing(false);
+      toast.success(response?.data?.message);
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   useEffect(() => {
-    if (!user) {
-      (async () => {
-        setLoading(true);
-        await getUserProfile(setUser);
-      })();
-    }
+    setUser(user);
     // for personal
     if (user) {
       const userPersonalData = {
@@ -251,7 +255,7 @@ export function Profile() {
         user?.additionalDetails?.professionalInformation?.experienceLevel
       );
     }
-  }, [user, setUser]);
+  }, [user]);
 
   const handlePersonalInputChange = (field, value) => {
     setEditingProfilePersonalData((prev) => ({ ...prev, [field]: value }));
@@ -314,16 +318,11 @@ export function Profile() {
         return;
       }
 
-      const response = await updatePersonalProfileDetails({
+      const updatedData = {
         ...editingProfilePersonalData,
         gender: editGender?.label,
-      });
-      if (response?.data?.success) {
-        await getUserProfile(setUser);
-        setGender(editGender);
-        setProfilePersonalData(editingProfilePersonalData);
-        setIsEditing(false);
-      }
+      };
+      personalProfileMutation.mutate(updatedData);
     }
     if (activeSection === "professional") {
       const { currentRole, targetRole, skills, targetCompanies } =
@@ -360,16 +359,12 @@ export function Profile() {
         setIsEditing(false);
         return;
       }
-      const response = await updateProfessionalProfileDetails({
+
+      const updatedData = {
         ...editingProfilProfessionalData,
-        experience: editExperience?.label,
-      });
-      if (response?.data?.success) {
-        await getUserProfile(setUser);
-        setProfileProfessionalData(editingProfilProfessionalData);
-        setExperience(editExperience);
-        setIsEditing(false);
-      }
+        experience: editExperience?.value,
+      };
+      professionalProfileMutation.mutate(updatedData);
     }
   };
 
@@ -400,12 +395,16 @@ export function Profile() {
     isNotLocalLogin = user?.authStrategy !== "local";
   }
 
-  if (loading) {
+  if (loading || isLoding) {
     return (
       <div className="w-full min-h-screen bg-white flex items-center justify-center">
         <Spinner />
       </div>
     );
+  }
+
+  if (isError) {
+    return <ErrorPage error={error.message} />;
   }
 
   return (
@@ -853,31 +852,33 @@ export function Profile() {
                       {(isEditing
                         ? editingProfilProfessionalData
                         : profileProfessionalData
-                      )?.targetCompanies.map((company, index) => (
-                        <span
-                          key={index}
-                          className="!px-3 !py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center !space-x-1 capitalize"
-                        >
-                          <span>{company}</span>
-                          {isEditing && (
-                            <button
-                              onClick={() => {
-                                const newCompanies =
-                                  editingProfilProfessionalData?.targetCompanies.filter(
-                                    (_, i) => i !== index
+                      )?.targetCompanies.map((company, index) => {
+                        return (
+                          <span
+                            key={index}
+                            className="!px-3 !py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center !space-x-1 capitalize"
+                          >
+                            <span>{company}</span>
+                            {isEditing && (
+                              <button
+                                onClick={() => {
+                                  const newCompanies =
+                                    editingProfilProfessionalData?.targetCompanies.filter(
+                                      (_, i) => i !== index
+                                    );
+                                  handleProfesssionalInputChange(
+                                    "targetCompanies",
+                                    newCompanies
                                   );
-                                handleProfesssionalInputChange(
-                                  "targetCompanies",
-                                  newCompanies
-                                );
-                              }}
-                              className="text-purple-600 hover:text-purple-800 cursor-pointer capitalize"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          )}
-                        </span>
-                      ))}
+                                }}
+                                className="text-purple-600 hover:text-purple-800 cursor-pointer capitalize"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </span>
+                        );
+                      })}
                     </div>
                     {isEditing && (
                       <input
@@ -887,7 +888,7 @@ export function Profile() {
                         onKeyPress={(e) => {
                           if (e.key === "Enter" && e.target.value.trim()) {
                             handleProfesssionalInputChange("targetCompanies", [
-                              ...profileProfessionalData.targetCompanies,
+                              ...editingProfilProfessionalData.targetCompanies,
                               e.target.value.trim(),
                             ]);
                             e.target.value = "";
@@ -1390,8 +1391,8 @@ export function Profile() {
               {/* Overview */}
               {activeSection === "overview" && (
                 <div className="!p-4 !space-y-5">
-                  <QuickStats userStats={userStats} />
-                  <RecentActivity recentSessions={recentSessions} isUsingTab={false}/>
+                  <QuickStats />
+                  <RecentActivity isUsingTab={false} />
                 </div>
               )}
             </div>

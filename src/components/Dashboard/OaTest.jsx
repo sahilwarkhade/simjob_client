@@ -1,17 +1,19 @@
-import { Building2, PlayIcon } from "lucide-react";
+import { Building2, Loader2, PlayIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Dropdown } from "../General/Dropdown";
 import {
   companies,
   difficultyLevels,
   experienceLevels,
-  programmingLanguages,
   roles,
   testSections,
 } from "../../constants";
 import { PiExam } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { createOaTest } from "../../services/apis/oaTestApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import ErrorPage from "../../pages/ErrorPage";
 const oaType = [
   {
     id: 1,
@@ -28,7 +30,7 @@ const oaType = [
 ];
 
 export const OaTest = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [selectOAType, setSelectOAType] = useState(null);
   const [selectCompany, setSelectCompany] = useState(null);
   const [selectRole, setSelectRole] = useState(null);
@@ -36,37 +38,105 @@ export const OaTest = () => {
   const [selectDifficultyLevel, setSelectDifficultyLevel] = useState(null);
   const [instructions, setInstructions] = useState("");
   const [selectTestSections, setSelectTestSections] = useState([]);
-  const [
-    selectPreferredProgrammingLanguages,
-    setSelectPreferredProgrammingLanguages,
-  ] = useState([]);
+  const [hasErrorField, setHasErrorField] = useState(false);
+  const [errorFields, setErrorFields] = useState({});
 
-  const handleOnClick = async(e) => {
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (formData) => createOaTest(formData, formData.testCategory),
+
+    onSuccess: (response) => {
+      toast.success(response?.data?.message);
+      navigate(`/test?testid=${response?.data?.testID}`);
+    },
+    onError: (error) => {
+      console.log("Error in creating test", error);
+      toast.error(error?.message);
+    },
+  });
+
+  const handleOnClick = async (e) => {
     e.preventDefault();
 
+    let currentErrors = {};
+
+    if (selectOAType?.value === "companyspecific") {
+      currentErrors = handleCheckFieldsCompanySpecific();
+    } else {
+      currentErrors = handleCheckFieldsPraticeTest();
+    }
+    setErrorFields(currentErrors);
+
+    if (Object.keys(currentErrors).length > 0) {
+      setHasErrorField(true);
+      return;
+    }
     const formData = {
-      oaCategory: selectOAType?.value,
-      role: selectRole?.value,
-      experienceLevel: selectExperienceLevel?.value,
-      selectedSections: [
-        ...selectTestSections.map((section) => section?.value),
-      ],
-      preferredProgrammingLanguages: [
-        ...selectPreferredProgrammingLanguages.map(
-          (language) => language?.value
-        ),
-      ],
-      instructions: instructions,
+      testCategory: selectOAType?.value,
     };
 
     if (selectOAType?.value === "companyspecific") {
-      formData.company = selectCompany?.value;
+      formData.companyName = selectCompany?.value;
+      formData.role = selectRole?.value;
+      formData.experienceLevel = selectExperienceLevel?.value;
     } else {
-      formData.difficultyLevel = selectDifficultyLevel?.value;
+      formData.difficulty = selectDifficultyLevel;
+      formData.userSelectedSections = [
+        ...selectTestSections.map((section) => section?.value),
+      ];
+      formData.specialInstructions = instructions;
     }
-    console.log("FORM DATA ::: ", formData)
-    await createOaTest(formData,navigate,formData?.oaCategory);
+    setHasErrorField(false);
+    console.log(formData);
+    mutate(formData);
   };
+
+  const handleCheckFieldsCompanySpecific = () => {
+    const errorObj = {};
+    if (!selectOAType) {
+      errorObj.selectOAType = "Please, select the type of test.";
+    }
+    if (!selectCompany) {
+      errorObj.selectCompany = "Please, select a company.";
+    }
+    if (!selectExperienceLevel) {
+      errorObj.selectExperienceLevel = "Please, select an experience level.";
+    }
+    if (!selectRole) {
+      errorObj.selectRole = "Please, select a role.";
+    }
+    return errorObj;
+  };
+
+  const handleCheckFieldsPraticeTest = () => {
+    const errorObj = {};
+    if (!selectOAType) {
+      errorObj.selectOAType = "Please, select the type of test.";
+    }
+    if (!selectDifficultyLevel) {
+      errorObj.selectDifficultyLevel = "Please, select a difficulty level.";
+    }
+    if (!selectTestSections || selectTestSections?.length === 0) {
+      errorObj.selectTestSections = "Please, select at least one section.";
+    }
+    if (selectTestSections.length > 4) {
+      errorObj.selectTestSections = "You can select at most 4 sections.";
+    }
+    return errorObj;
+  };
+
+  useEffect(() => {
+    if (selectOAType?.value === "companyspecific") {
+      const errors = handleCheckFieldsCompanySpecific();
+      setErrorFields(errors);
+    }
+  }, [selectOAType, selectCompany, selectRole, selectExperienceLevel]);
+
+  useEffect(() => {
+    if (selectOAType?.value === "practice") {
+      const errors = handleCheckFieldsPraticeTest();
+      setErrorFields(errors);
+    }
+  }, [selectOAType, selectDifficultyLevel, selectTestSections]);
 
   useEffect(() => {
     setSelectCompany(null);
@@ -75,9 +145,13 @@ export const OaTest = () => {
     setSelectRole(null);
     setSelectTestSections([]);
     setInstructions("");
-    setSelectPreferredProgrammingLanguages([]);
+    setErrorFields({});
+    setHasErrorField(false);
   }, [selectOAType]);
 
+  if (isError) {
+    toast.error(error.message) ;
+  }
   return (
     <div className="!space-y-6">
       {/* Session Setup */}
@@ -93,92 +167,137 @@ export const OaTest = () => {
             onChange={setSelectOAType}
             placeholder="select type of online assessment"
             required
+            disabled={isPending}
+            error={
+              hasErrorField && errorFields.hasOwnProperty("selectOAType")
+                ? errorFields.selectOAType
+                : null
+            }
           />
         </div>
         <div className="grid md:grid-cols-2 !gap-6">
           {selectOAType?.id !== 2 ? (
-            <Dropdown
-              label="Choose Company"
-              options={companies}
-              value={selectCompany}
-              onChange={setSelectCompany}
-              placeholder="choose company"
-              searchable
-              required
-              variant="filled"
-            />
+            <>
+              <Dropdown
+                label="Choose Company"
+                options={companies}
+                value={selectCompany}
+                onChange={setSelectCompany}
+                placeholder="choose company"
+                searchable
+                required
+                disabled={isPending}
+                variant="filled"
+                error={
+                  hasErrorField &&
+                  errorFields.hasOwnProperty("selectCompany") &&
+                  errorFields.selectCompany
+                }
+              />
+              <Dropdown
+                label="Select Role"
+                options={roles}
+                value={selectRole}
+                onChange={setSelectRole}
+                placeholder="select role"
+                required
+                disabled={isPending}
+                error={
+                  hasErrorField && errorFields.hasOwnProperty("selectRole")
+                    ? errorFields.selectRole
+                    : null
+                }
+              />
+              <Dropdown
+                label="Experience Level"
+                options={experienceLevels}
+                value={selectExperienceLevel}
+                onChange={setSelectExperienceLevel}
+                placeholder="select experience level"
+                required
+                disabled={isPending}
+                error={
+                  hasErrorField &&
+                  errorFields.hasOwnProperty("selectExperienceLevel")
+                    ? errorFields.selectExperienceLevel
+                    : null
+                }
+              />
+            </>
           ) : (
-            <Dropdown
-              label="Difficulty Level"
-              options={difficultyLevels}
-              value={selectDifficultyLevel}
-              onChange={setSelectDifficultyLevel}
-              placeholder="select difficulty level"
-              required
-            />
-          )}
-          <Dropdown
-            label="Select Role"
-            options={roles}
-            value={selectRole}
-            onChange={setSelectRole}
-            placeholder="select role"
-            required
-          />
-          <Dropdown
-            label="Experience Level"
-            options={experienceLevels}
-            value={selectExperienceLevel}
-            onChange={setSelectExperienceLevel}
-            placeholder="select experience level"
-            required
-          />
-          <Dropdown
-            label="Select Preferred Languages"
-            options={programmingLanguages}
-            value={selectPreferredProgrammingLanguages}
-            onChange={setSelectPreferredProgrammingLanguages}
-            placeholder="select programming languages..."
-            multiple
-            clearable
-            helperText={"You can select max 4 languages"}
-            required
-          />
-          <Dropdown
-            label="Select Test Sections"
-            options={testSections}
-            value={selectTestSections}
-            onChange={setSelectTestSections}
-            placeholder="select sections"
-            multiple
-            clearable
-            helperText={"You can select multiple sections"}
-          />
+            <>
+              <Dropdown
+                label="Difficulty Level"
+                options={difficultyLevels}
+                value={selectDifficultyLevel}
+                onChange={setSelectDifficultyLevel}
+                placeholder="select difficulty level"
+                required
+                disabled={isPending}
+                error={
+                  hasErrorField &&
+                  errorFields.hasOwnProperty("selectDifficultyLevel")
+                    ? errorFields.selectDifficultyLevel
+                    : null
+                }
+              />
+              <Dropdown
+                disabled={isPending}
+                label="Select Test Sections"
+                options={testSections}
+                value={selectTestSections}
+                onChange={setSelectTestSections}
+                placeholder="select sections"
+                multiple
+                clearable
+                helperText={"You can select multiple sections(MAX-4)"}
+                required
+                error={
+                  hasErrorField &&
+                  errorFields.hasOwnProperty("selectTestSections")
+                    ? errorFields.selectTestSections
+                    : null
+                }
+              />
 
-          <div className="flex flex-col">
-            <label
-              htmlFor="user-instructions"
-              className="font-medium text-sm text-gray-700 !mb-1.5"
-            >
-              Special Instructions
-            </label>
-            <textarea
-              id="user-instructions"
-              placeholder="enter your instructions..."
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              className="h-full text-sm !p-3 border text-gray-600 border-gray-400 rounded-xl"
-            />
-          </div>
+              <div className="flex flex-col">
+                <label
+                  htmlFor="user-instructions"
+                  className="font-medium text-sm text-gray-700 !mb-1.5"
+                >
+                  Special Instructions
+                </label>
+                <textarea
+                  disabled={isPending}
+                  id="user-instructions"
+                  placeholder="enter your instructions..."
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="h-full text-sm !p-3 border text-gray-600 border-gray-400 rounded-xl"
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="!mt-6 flex justify-center">
           <button
-            className="flex items-center !space-x-3 !px-8 !py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg cursor-pointer"
+            className={`flex items-center !space-x-3 !px-8 !py-3 ${
+              isPending
+                ? "bg-gray-700 cursor-progress"
+                : "bg-gradient-to-r  from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 cursor-pointer hover:scale-102"
+            } text-white rounded-lg  transition-all duration-300 shadow-lg `}
             onClick={(e) => handleOnClick(e)}
+            disabled={isPending}
           >
-            {<PiExam className="w-5 h-5" />}
-            <span className="font-medium">{"Start Online Assessment"}</span>
+            {isPending ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <PiExam className="w-5 h-5" />
+            )}
+            <span className="font-medium">{`${
+              isPending ? "Creating..." : "Start Online Assessment"
+            }`}</span>
           </button>
         </div>
       </div>

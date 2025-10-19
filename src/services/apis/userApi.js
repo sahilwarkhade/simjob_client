@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import { apiConnector } from "../apiConnector";
 import { BASE_URL } from "../../constants";
 
-export const getUserProfile = async (setUser) => {
+export const getUserProfile = async () => {
   try {
     const response = await apiConnector(
       "GET",
@@ -13,7 +13,7 @@ export const getUserProfile = async (setUser) => {
       throw new Error(response?.data?.message);
     }
 
-    setUser(response?.data?.user);
+    return response?.data?.user;
   } catch (error) {
     console.log("ERROR IN GETTING USER PROFILE :: ", error);
     toast.error(error?.response?.data?.message || error?.message);
@@ -42,43 +42,23 @@ export const updateUserProfileImage = async (formData) => {
 };
 
 export const updatePersonalProfileDetails = async (formData) => {
-  try {
-    const response = await apiConnector(
-      "POST",
-      `${BASE_URL}/user/profile/update/personaldetails`,
-      formData
-    );
+  const response = await apiConnector(
+    "POST",
+    `${BASE_URL}/user/profile/update/personaldetails`,
+    formData
+  );
 
-    if (!response?.data?.success) {
-      throw new Error(response?.data?.message);
-    }
-
-    toast.success(response?.data?.message);
-    return response;
-  } catch (error) {
-    console.log("Error in updatePersonalProfileDetails :: ", error);
-    toast.error(error?.response?.data?.message);
-  }
+  return response;
 };
 
 export const updateProfessionalProfileDetails = async (formData) => {
-  try {
-    const response = await apiConnector(
-      "POST",
-      `${BASE_URL}/user/profile/update/professionaldetails`,
-      formData
-    );
+  const response = await apiConnector(
+    "POST",
+    `${BASE_URL}/user/profile/update/professionaldetails`,
+    formData
+  );
 
-    if (!response?.data?.success) {
-      throw new Error(response?.data?.message);
-    }
-
-    toast.success(response?.data?.message);
-    return response;
-  } catch (error) {
-    console.log("Error in updatePersonalProfileDetails :: ", error);
-    toast.error(error?.response?.data?.message);
-  }
+  return response;
 };
 
 export const updatePassword = async (
@@ -122,22 +102,30 @@ export const updatePassword = async (
   }
 };
 
-export const deleteAccount = async (setIsLoggedIn, navigate) => {
+export const deleteAccount = async () => {
+  const response = await apiConnector(
+    "DELETE",
+    `${BASE_URL}/user/profile/deleteaccount`
+  );
+
+  return response;
+};
+
+export const contactUs = async (formData, setIsSubmitted) => {
   try {
     const response = await apiConnector(
-      "DELETE",
-      `${BASE_URL}/user/profile/deleteaccount`
+      "POST",
+      `${BASE_URL}/contact`,
+      formData
     );
 
     if (!response?.data?.success) {
-      throw new Error(response?.data?.message);
+      throw new Error("Something went wrong, please again later");
     }
-
+    setIsSubmitted(true);
     toast.success(response?.data?.message);
-    setIsLoggedIn(false);
-    navigate("/");
   } catch (error) {
-    console.log("ERROR in deleting acccount ::", error);
+    console.log("ERROR IN SENDING CONTACT US FORM :: ", error);
     toast.error(error?.response?.data?.message);
   }
 };

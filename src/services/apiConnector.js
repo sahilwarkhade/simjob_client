@@ -1,7 +1,7 @@
 import axios from "axios"
 import { BASE_URL } from "../constants";
 
-export const axiosInstance = axios.create({baseUrl: BASE_URL,withCredentials:true});
+export const axiosInstance = axios.create({withCredentials:true});
 
 export const apiConnector = (method, url, bodyData, headers, params) => {
     return axiosInstance({

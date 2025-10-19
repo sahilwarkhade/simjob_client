@@ -1,4 +1,4 @@
-import {useContext, useState } from "react";
+import { useContext} from "react";
 import {
   Mic,
   Brain,
@@ -6,12 +6,9 @@ import {
   Calendar,
   Play,
   BarChart3,
-  Filter,
-  ChevronRight,
   BookOpen,
   MessageSquare,
   Zap,
-  Eye,
   History,
 } from "lucide-react";
 import { NavigationTab } from "../components/Dashboard/NavigationTab";
@@ -21,42 +18,10 @@ import RecentActivity from "../components/Dashboard/RecentActivity";
 import { MockInterviewForm } from "../components/Dashboard/MockInterviewForm";
 import { OaTest } from "../components/Dashboard/OaTest";
 import { DashboardContext } from "../context/DashboardContext";
+import HistoryTab from "../components/Dashboard/History";
 
 export default function Dashboard() {
-  const {activeTab, setActiveTab} = useContext(DashboardContext)
-
-  const recentSessions = [
-    {
-      id: 1,
-      company: "Google",
-      role: "Software Engineer",
-      date: "2025-01-10",
-      duration: "25 min",
-      score: 8.5,
-      status: "completed",
-      feedback: "Great technical responses, work on behavioral questions",
-    },
-    {
-      id: 2,
-      company: "Microsoft",
-      role: "Product Manager",
-      date: "2025-01-09",
-      duration: "30 min",
-      score: 7.8,
-      status: "completed",
-      feedback: "Strong product thinking, improve on leadership examples",
-    },
-    {
-      id: 3,
-      company: "Amazon",
-      role: "Data Scientist",
-      date: "2025-01-08",
-      duration: "22 min",
-      score: 8.9,
-      status: "completed",
-      feedback: "Excellent problem-solving approach",
-    },
-  ];
+  const { activeTab, setActiveTab } = useContext(DashboardContext);
 
   const skillsProgress = [
     { skill: "Technical Skills", progress: 85, change: "+5%" },
@@ -81,11 +46,11 @@ export default function Dashboard() {
       label: "OA Test",
       icon: <Calendar className="w-4 h-4" />,
     },
-    {
-      id: "progress",
-      label: "Progress",
-      icon: <TrendingUp className="w-4 h-4" />,
-    },
+    // {
+    //   id: "progress",
+    //   label: "Progress",
+    //   icon: <TrendingUp className="w-4 h-4" />,
+    // },
     {
       id: "history",
       label: "History",
@@ -108,7 +73,7 @@ export default function Dashboard() {
         {activeTab === "overview" && (
           <div className="!space-y-6">
             {/* Quick Stats */}
-            <QuickStats/>
+            <QuickStats />
 
             {/* Quick Actions */}
             <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
@@ -124,7 +89,10 @@ export default function Dashboard() {
                   <span className="font-medium">{"Start New Session"}</span>
                 </button>
 
-                <button className="flex items-center justify-center !space-x-3 !p-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300 cursor-pointer">
+                <button
+                  title="Sorry, currently not available"
+                  className="flex items-center justify-center !space-x-3 !p-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
+                >
                   <BookOpen className="w-5 h-5" />
                   <span className="font-medium">View Resources</span>
                 </button>
@@ -141,9 +109,7 @@ export default function Dashboard() {
             {/* Recent Activity & Upcoming */}
             <div className="grid lg:grid-cols-1 !gap-6">
               {/* Recent Sessions */}
-              <RecentActivity
-                recentSessions={recentSessions}
-              />
+              <RecentActivity />
 
               {/* <UpcomingInterviews /> */}
             </div>
@@ -254,67 +220,7 @@ export default function Dashboard() {
         )}
 
         {/* History Tab */}
-        {activeTab === "history" && (
-          <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200 text-gray-700">
-            <div className="flex items-center justify-between !mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Practice History
-              </h3>
-              <div className="flex items-center !space-x-2">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <select className="text-sm border border-gray-300 rounded-md !px-2 !py-1 focus:ring-2 focus:ring-indigo-500">
-                  <option>All Sessions</option>
-                  <option>Mock Sessions</option>
-                  <option>OA Sessions</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="!space-y-3">
-              {recentSessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="flex items-center justify-between !p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => {}}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center !space-x-3 !mb-2">
-                      <h4 className="font-medium text-gray-900">
-                        {session.company}
-                      </h4>
-                      <span className="text-xs bg-indigo-100 text-indigo-800 !px-2 !py-1 rounded-full">
-                        {session.role}
-                      </span>
-                      <span
-                        className={`text-xs !px-2 !py-1 rounded-full ${
-                          session.score >= 8
-                            ? "bg-green-100 text-green-800"
-                            : session.score >= 6
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        Score: {session.score}/10
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 !mb-1">
-                      {session.feedback}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {session.date} • {session.duration}
-                    </p>
-                  </div>
-                  <div className="flex items-center !space-x-2">
-                    <button className="!p-2 text-gray-400 hover:text-indigo-600 transition-colors">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {activeTab === "history" && <HistoryTab />}
       </div>
     </div>
   );

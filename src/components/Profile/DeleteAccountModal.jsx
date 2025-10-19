@@ -3,13 +3,37 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 import { deleteAccount } from "../../services/apis/userApi";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import ErrorPage from "../../pages/ErrorPage";
 
 const DeleteAccountModal = ({ setIsDeleteModalOpen }) => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { setIsLoggedIn } = useContext(AuthContext);
+
+  const queryClient = useQueryClient();
+  const { mutate, isError, error, isPending } = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: () => {
+      queryClient.clear();
+      setIsLoggedIn(false);
+      alert("Account deleted successfully");
+      navigate("/");
+    },
+
+    onError: (error) => {
+      toast.error(error?.message);
+    },
+
+    onSettled: () => {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+      setConfirmText("");
+    },
+  });
 
   const handleDeleteAccount = async () => {
     if (confirmText !== "DELETE") {
@@ -17,18 +41,25 @@ const DeleteAccountModal = ({ setIsDeleteModalOpen }) => {
     }
     setIsDeleting(true);
 
-    await deleteAccount(setIsLoggedIn,navigate);
-
-    alert("Account deleted successfully");
-    setIsDeleting(false);
-    setIsDeleteModalOpen(false);
-    setConfirmText("");
+    mutate();
   };
 
   const handleCancelDelete = () => {
     setIsDeleteModalOpen(false);
     setConfirmText("");
   };
+
+  if (isPending) {
+    return (
+      <div className="w-full min-h-screen bg-white flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <ErrorPage error={error.message} />;
+  }
 
   const isConfirmValid = confirmText === "DELETE";
   return (

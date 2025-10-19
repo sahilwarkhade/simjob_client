@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { LogOut, User } from "lucide-react";
 import { logout } from "../services/apis/authApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,11 +25,25 @@ const Navbar = () => {
   }, []);
 
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const queryClient = useQueryClient();
 
-  const handleLogout = async () => {
-    await logout(setIsLoggedIn);
-    navigate("/");
+  const { mutate } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      setIsLoggedIn(false);
+      navigate("/");
+      queryClient.clear();
+      toast.success("Successfully Logout");
+    },
+    onError: () => {
+      toast.error("Sorry, not able log out");
+    },
+  });
+
+  const handleLogout = () => {
+    mutate();
   };
+
   return (
     <header className={`header ${isScrolled ? "header-scrolled" : ""}`}>
       <nav className="nav">

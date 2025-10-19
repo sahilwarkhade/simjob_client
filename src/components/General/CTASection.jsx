@@ -1,6 +1,10 @@
-import React from "react";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const CTASection = () => {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useContext(AuthContext);
   return (
     <section
       style={{
@@ -73,14 +77,10 @@ const CTASection = () => {
           }}
           onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
           onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+          onClick={() => (isLoggedIn ? navigate("/dashboard") : navigate("/login"))}
         >
           Get Started Free
         </button>
-
-        {/* Note */}
-        {/* <p style={{ fontSize: "0.9rem", opacity: 0.8, marginTop: "1rem" }}>
-          No credit card required • 7-day free trial
-        </p> */}
       </div>
     </section>
   );

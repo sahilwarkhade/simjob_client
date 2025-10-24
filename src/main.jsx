@@ -16,26 +16,25 @@ const queryClient = new QueryClient({
   },
 });
 
-const clientId =
-  "639628443314-3p7dilpqcmn5o1gotlo1mvcimff5s7qv.apps.googleusercontent.com";
+const clientId = import.meta.env.VITE_GOOGLR_CLIENT_ID;
 createRoot(document.getElementById("root")).render(
   <QueryClientProvider client={queryClient}>
     <GoogleOAuthProvider clientId={clientId}>
       <Router>
-          <ToastContainer
-            position="top-right"
-            autoClose={1000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
-          <App />
-          <ReactQueryDevtools initialIsOpen={false} />
+        <ToastContainer
+          position="top-right"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} />
       </Router>
     </GoogleOAuthProvider>
   </QueryClientProvider>

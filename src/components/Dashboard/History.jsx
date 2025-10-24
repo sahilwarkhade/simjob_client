@@ -7,7 +7,7 @@ import { getHistory } from "../../services/apis/dashboardApi";
 import { Spinner } from "../Spinner/Spinner";
 import { useNavigate } from "react-router-dom";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 4;
 const History = () => {
   const [selectedHistoryType, setSelectedHistoryType] = useState(
     historyOptions[0]
@@ -68,7 +68,7 @@ const History = () => {
   const end = pageNumber * PAGE_SIZE + PAGE_SIZE;
 
   return (
-    <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200 text-gray-700">
+    <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200 text-gray-700 select-none">
       {/* Header */}
       <div className="flex items-center justify-between !mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
@@ -189,19 +189,19 @@ const History = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center !space-x-2 !ml-2">
+                {session?.status !== 'pending' && <div className="flex items-center !space-x-2 !ml-2">
                   <button className="!p-2 text-gray-400 hover:text-indigo-600 transition-colors">
                     <Eye className="w-4 h-4" />
                   </button>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
+                </div>}
               </div>
             ))}
             <div className="flex justify-between">
               <button
                 className={`border !px-2.5 !py-1 rounded-lg text-sm font-semibold tracking-wider ${
                   pageNumber === 0
-                    ? "cursor-not-allowed"
+                    ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer hover:shadow-2xl hover:scale-102 transition duration-500 hover:bg-gray-400/50"
                 }`}
                 disabled={pageNumber == 0}
@@ -212,7 +212,7 @@ const History = () => {
               <button
                 className={`border !px-2.5 !py-1 rounded-lg text-sm font-semibold tracking-wider ${
                   pageNumber === totalPages - 1
-                    ? "cursor-not-allowed"
+                    ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer hover:shadow-2xl hover:scale-102 transition duration-500 hover:bg-gray-400/50"
                 }`}
                 disabled={pageNumber === totalPages - 1}

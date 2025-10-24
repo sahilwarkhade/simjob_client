@@ -1,4 +1,4 @@
-export const BASE_URL = "http://localhost:4000/api/v1";
+export const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const companies = [
   { id: 1, value: "abb", label: "ABB" },

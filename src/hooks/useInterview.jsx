@@ -314,7 +314,7 @@ export const useInterview = (interviewId) => {
   useEffect(() => {
     if (!isInitialized) return;
     ws.current = new WebSocket(
-      `ws://localhost:4000?interviewId=${interviewId}`
+      `wss://${import.meta.env.VITE_BACKEND_HOST}?interviewId=${interviewId}`
     );
     ws.current.binaryType = "arraybuffer";
 

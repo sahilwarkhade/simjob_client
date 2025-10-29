@@ -72,7 +72,6 @@ const LoginPage = () => {
           onError={() => {
             console.log("Login Failed");
           }}
-          useOneTap
         />
         <div className="relative flex items-center">
           <button

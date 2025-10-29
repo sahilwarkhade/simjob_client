@@ -23,9 +23,9 @@ export const continueWithGoogle = async (idToken, navigate, setIsLoggedIn) => {
 };
 
 export const continueWithGitHub = async () => {
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${"Ov23liR2RpGlqlV3Jnz1"}&scope=user:email&redirect_uri=http://${
+  const authUrl = `https://github.com/login/oauth/authorize?client_id=${"Ov23liR2RpGlqlV3Jnz1"}&scope=user:email&redirect_uri=https://${
     import.meta.env.VITE_BACKEND_HOST
-  }/api/v1/auth/github/callback}`;
+  }/api/v1/auth/github/callback`;
   window.location.href = authUrl;
 };
 

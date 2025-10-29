@@ -1,4 +1,5 @@
-import { CheckCircle, Link } from "lucide-react";
+import { CheckCircle} from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const CompleteScreen = ({ title, description }) => {
   return (

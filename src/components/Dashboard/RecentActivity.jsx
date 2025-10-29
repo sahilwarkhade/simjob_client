@@ -5,8 +5,6 @@ import { DashboardContext } from "../../context/DashboardContext";
 import { getRecentSessions } from "../../services/apis/dashboardApi";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "../Spinner/Spinner";
-import { getFeedback } from "../../services/apis/oaTestApi";
-import ErrorPage from "../../pages/ErrorPage";
 import { toast } from "react-toastify";
 
 const RecentActivity = ({ isUsingTab = true }) => {
@@ -43,7 +41,7 @@ const RecentActivity = ({ isUsingTab = true }) => {
     toast.error(error.message);
   }
   return (
-    <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
+    <div className="bg-white !p-4 md:!p-6 rounded-xl shadow-sm border border-gray-200">
       <div className="flex items-center justify-between !mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Recent Sessions</h3>
         <button
@@ -79,7 +77,7 @@ const RecentActivity = ({ isUsingTab = true }) => {
                        {session?.role?.split('_')?.join(" ") || session?.difficulty || session?.difficultyLevel || 'Easy'}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600 flex gap-x-5">
+                  <div className="!mt-5 text-sm text-gray-600 flex flex-col gap-4 md:flex-row gap-x-5">
                     <p className="">
                       Score:{" "}
                       <span

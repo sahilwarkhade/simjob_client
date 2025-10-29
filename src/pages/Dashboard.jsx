@@ -76,14 +76,14 @@ export default function Dashboard() {
             <QuickStats />
 
             {/* Quick Actions */}
-            <div className="bg-white !p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="bg-white !p-4 md:!p-6 rounded-xl shadow-sm border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 !mb-4">
                 Quick Actions
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 !gap-4">
                 <button
                   onClick={() => setActiveTab("mockInterview")}
-                  className="flex items-center justify-center !space-x-3 !p-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 cursor-pointer"
+                  className="flex items-center justify-center !space-x-3 !p-3 md:!p-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 cursor-pointer"
                 >
                   {<Play className="w-5 h-5" />}
                   <span className="font-medium">{"Start New Session"}</span>
@@ -91,14 +91,14 @@ export default function Dashboard() {
 
                 <button
                   title="Sorry, currently not available"
-                  className="flex items-center justify-center !space-x-3 !p-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
+                  className="flex items-center justify-center !space-x-3 !p-3 md:!p-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300 cursor-pointer"
                 >
                   <BookOpen className="w-5 h-5" />
                   <span className="font-medium">View Resources</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("oatest")}
-                  className="flex items-center justify-center !space-x-3 !p-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 cursor-pointer"
+                  className="flex items-center justify-center !space-x-3 !p-3 md:!p-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 cursor-pointer"
                 >
                   {<PiExam className="w-5 h-5" />}
                   <span className="font-medium">Online Assessment</span>
